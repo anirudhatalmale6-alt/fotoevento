@@ -41,6 +41,8 @@ th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font
 th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .badge{display:inline-block;font-size:12px;background:#eef1f7;color:var(--muted);border-radius:999px;padding:3px 10px}
 .badge.on{background:#e7f8f1;color:#0b6b52}
+.kv{padding:6px 0;font-size:14px}.kv b{color:var(--muted);font-weight:600;margin-right:4px}
+.navlink{font-weight:700;color:var(--muted);padding:8px 4px}.navlink.active{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -50,6 +52,10 @@ th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04
       <span class="logo">JG</span>
       <span>FotoEvento <small>Joel Garate Fotografía</small></span>
     </a>
+    @auth
+      <a href="{{ route('admin.events.index') }}" class="navlink {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Eventos</a>
+      <a href="{{ route('admin.orders.index') }}" class="navlink {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Pedidos</a>
+    @endauth
     <div class="sp"></div>
     @auth
       <a href="{{ route('admin.events.create') }}" class="btn sm">+ Nuevo evento</a>
