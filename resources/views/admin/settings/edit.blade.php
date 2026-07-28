@@ -37,4 +37,31 @@
 
   <button class="btn" style="margin-top:16px">Guardar datos de Yape</button>
 </form>
+
+{{-- ====== Seguridad: cambiar contraseña ====== --}}
+<div class="card" style="margin-top:28px;max-width:520px">
+  <h2>Seguridad · Cambiar contraseña</h2>
+  <p class="muted" style="font-size:13px;margin-top:0">Cambia la contraseña con la que ingresas al panel. Usa una que solo tú conozcas (mínimo 8 caracteres).</p>
+
+  @if($errors->has('current_password') || $errors->has('password'))
+    <div class="err" style="margin-top:4px">{{ $errors->first('current_password') ?: $errors->first('password') }}</div>
+  @endif
+
+  <form method="post" action="{{ route('admin.password.update') }}" autocomplete="off">
+    @csrf
+    <div style="margin-bottom:12px">
+      <label>Contraseña actual</label>
+      <input type="password" name="current_password" autocomplete="current-password" required>
+    </div>
+    <div style="margin-bottom:12px">
+      <label>Nueva contraseña</label>
+      <input type="password" name="password" autocomplete="new-password" required minlength="8">
+    </div>
+    <div style="margin-bottom:12px">
+      <label>Repite la nueva contraseña</label>
+      <input type="password" name="password_confirmation" autocomplete="new-password" required minlength="8">
+    </div>
+    <button class="btn dark">Actualizar contraseña</button>
+  </form>
+</div>
 @endsection

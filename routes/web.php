@@ -37,6 +37,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Configuración (datos de Yape)
         Route::get('configuracion', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('configuracion', [SettingsController::class, 'update'])->name('settings.update');
+
+        // Seguridad: cambio de contraseña del administrador
+        Route::post('password', [AuthController::class, 'updatePassword'])->name('password.update');
     });
 });
 
