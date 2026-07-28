@@ -39,6 +39,12 @@ class WatermarkService
         if ($src === false) {
             throw new \RuntimeException('No se pudo leer la imagen.');
         }
+
+        // Respetar la orientación EXIF (fotos verticales tomadas con el celular
+        // se guardan "acostadas" + una etiqueta que indica cómo girarlas). GD no
+        // aplica esa etiqueta solo, así que la corregimos aquí antes de procesar.
+        $src = $this->applyExifOrientation($src, $binary);
+
         $w = imagesx($src);
         $h = imagesy($src);
 
@@ -76,5 +82,51 @@ class WatermarkService
         imagedestroy($img);
 
         return $out;
+    }
+
+    /**
+     * Devuelve la imagen ya girada según su etiqueta EXIF de orientación.
+     * Sólo los JPEG llevan EXIF; para PNG u otros formatos se devuelve igual.
+     */
+    private function applyExifOrientation(\GdImage $src, string $binary): \GdImage
+    {
+        if (! function_exists('exif_read_data')) {
+            return $src;
+        }
+
+        $exif = @exif_read_data('data://image/jpeg;base64,' . base64_encode($binary));
+        $orientation = (int) ($exif['Orientation'] ?? 0);
+        if ($orientation < 2 || $orientation > 8) {
+            return $src;
+        }
+
+        // imagerotate gira en sentido antihorario.
+        switch ($orientation) {
+            case 2:
+                imageflip($src, IMG_FLIP_HORIZONTAL);
+                break;
+            case 3:
+                $src = imagerotate($src, 180, 0);
+                break;
+            case 4:
+                imageflip($src, IMG_FLIP_VERTICAL);
+                break;
+            case 5:
+                $src = imagerotate($src, -90, 0);
+                imageflip($src, IMG_FLIP_HORIZONTAL);
+                break;
+            case 6:
+                $src = imagerotate($src, -90, 0);
+                break;
+            case 7:
+                $src = imagerotate($src, 90, 0);
+                imageflip($src, IMG_FLIP_HORIZONTAL);
+                break;
+            case 8:
+                $src = imagerotate($src, 90, 0);
+                break;
+        }
+
+        return $src;
     }
 }
