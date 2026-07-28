@@ -21,7 +21,9 @@ header.top{position:sticky;top:0;z-index:40;background:rgba(14,16,21,.86);backdr
 @media(max-width:900px){.gallery{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){.gallery{grid-template-columns:repeat(2,1fr)}}
 .cell{position:relative;border-radius:12px;overflow:hidden;background:#1d222c;aspect-ratio:3/2;cursor:pointer}
-.cell img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.cell img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;pointer-events:none;-webkit-user-drag:none}
+.lb img{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 .cell:hover img{transform:scale(1.05)}
 .cell .code{position:absolute;left:8px;bottom:8px;font-size:11px;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:6px}
 .empty{color:var(--muted);text-align:center;padding:60px 0}
@@ -78,6 +80,10 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-a
 <footer>Galería protegida · Las fotos se muestran con marca de agua. La descarga en alta se habilita luego del pago.</footer>
 
 <script>
+// Disuasores anti-copia: sin clic derecho / sin arrastrar / sin guardar imagen.
+// (La protección real es la marca de agua; esto bloquea las formas fáciles de copiar.)
+document.addEventListener('contextmenu', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
+document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
 const cells=[...document.querySelectorAll('.cell')]; let idx=0;
 function open(i){ idx=(i+cells.length)%cells.length; document.getElementById('lbImg').src=cells[idx].dataset.full; document.getElementById('lb').classList.add('open'); }
 cells.forEach((c,i)=>c.addEventListener('click',()=>open(i)));

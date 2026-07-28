@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Enviar invitados al login del panel
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
+        // Confiar en el proxy (túnel de prueba / balanceador) para URLs https correctas
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
