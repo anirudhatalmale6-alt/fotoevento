@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Setting;
 use App\Services\PricingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
@@ -15,7 +18,6 @@ class GalleryController extends Controller
     {
         $event = Event::where('slug', $slug)->where('published', true)->firstOrFail();
 
-        // sin PIN -> acceso directo
         if (blank($event->pin) || $this->unlocked($event)) {
             return $this->gallery($event);
         }
@@ -35,15 +37,13 @@ class GalleryController extends Controller
     }
 
     /**
-     * El cliente confirma su selección de fotos. Se recalcula el precio en el
-     * servidor (fuente de verdad) y se registra el pedido en estado "pendiente".
-     * El pago con Yape y la aprobación se agregan en el Hito 3.
+     * El cliente confirma su selección. Se recalcula el precio en el servidor
+     * (fuente de verdad) y se registra el pedido en estado "pendiente".
      */
     public function storeOrder(Request $request, string $slug, PricingService $pricing)
     {
         $event = Event::where('slug', $slug)->where('published', true)->firstOrFail();
 
-        // el PIN debe estar validado en esta sesión (si el evento tiene PIN)
         if (filled($event->pin) && ! $this->unlocked($event)) {
             abort(403);
         }
@@ -60,7 +60,6 @@ class GalleryController extends Controller
             'customer_contact' => 'WhatsApp / celular',
         ]);
 
-        // sólo fotos que realmente pertenecen a este evento (evita manipulación)
         $photos = $event->photos()
             ->whereIn('id', $data['photo_ids'])
             ->get(['id', 'code']);
@@ -76,6 +75,7 @@ class GalleryController extends Controller
             $order = Order::create([
                 'event_id'         => $event->id,
                 'code'             => Order::makeCode(),
+                'token'            => Order::makeToken(),
                 'customer_name'    => $data['customer_name'],
                 'customer_contact' => $data['customer_contact'],
                 'customer_email'   => $data['customer_email'] ?? null,
@@ -97,22 +97,92 @@ class GalleryController extends Controller
             return $order;
         });
 
-        // permitir ver la confirmación de este pedido en esta sesión
         $request->session()->put('order_ok_' . $order->id, true);
 
-        return redirect()->route('gallery.order', ['slug' => $event->slug, 'code' => $order->code]);
+        return redirect()->route('gallery.order', [
+            'slug' => $event->slug, 'code' => $order->code, 't' => $order->token,
+        ]);
     }
 
-    /** Resumen del pedido (confirmación para el cliente). */
+    /** Pantalla del pedido: pago con Yape, subir comprobante o descargar (según estado). */
     public function order(Request $request, string $slug, string $code)
     {
         $event = Event::where('slug', $slug)->firstOrFail();
         $order = Order::where('event_id', $event->id)->where('code', $code)->firstOrFail();
 
-        abort_unless(session('order_ok_' . $order->id, false), 403);
+        $this->authorizeOrder($request, $order);
 
-        $order->load('items');
-        return view('gallery.order', compact('event', 'order'));
+        $order->load('items.photo');
+        $yape = Setting::yape();
+
+        return view('gallery.order', compact('event', 'order', 'yape'));
+    }
+
+    /** El cliente sube su comprobante de Yape (captura) y/o el código de operación. */
+    public function uploadReceipt(Request $request, string $slug, string $code)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        $order = Order::where('event_id', $event->id)->where('code', $code)->firstOrFail();
+
+        $this->authorizeOrder($request, $order);
+
+        if ($order->isApproved()) {
+            return redirect()->route('gallery.order', ['slug' => $slug, 'code' => $code, 't' => $order->token]);
+        }
+
+        $request->validate([
+            'receipt' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:8192'],
+            'op_code' => ['nullable', 'string', 'max:40'],
+        ], [], ['receipt' => 'comprobante', 'op_code' => 'código de operación']);
+
+        if (! $request->hasFile('receipt') && blank($request->input('op_code'))) {
+            return back()->withErrors(['receipt' => 'Sube la captura del Yape o ingresa el código de operación.']);
+        }
+
+        // El comprobante se guarda en disco PRIVADO (sólo lo ve el fotógrafo desde su panel).
+        if ($request->hasFile('receipt')) {
+            if ($order->receipt_path) {
+                Storage::disk('local')->delete($order->receipt_path);
+            }
+            $order->receipt_path = $request->file('receipt')
+                ->store("receipts/{$event->id}", 'local');
+        }
+
+        $order->op_code = $request->input('op_code');
+        $order->status  = 'comprobante';
+        $order->paid_at = now();
+        $order->save();
+
+        return redirect()
+            ->route('gallery.order', ['slug' => $slug, 'code' => $code, 't' => $order->token])
+            ->with('flash', 'comprobante');
+    }
+
+    /** Descarga segura del ORIGINAL (sin marca de agua). Sólo si el pedido está aprobado. */
+    public function download(Request $request, string $slug, string $code, OrderItem $item)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        $order = Order::where('event_id', $event->id)->where('code', $code)->firstOrFail();
+
+        $this->authorizeOrder($request, $order);
+        abort_unless($order->isApproved(), 403, 'El pago aún no está aprobado.');
+        abort_unless($item->order_id === $order->id, 404);
+
+        $photo = $item->photo;
+        abort_unless($photo && Storage::disk('local')->exists($photo->original_path), 404);
+
+        $filename = ($item->code ?: 'foto') . '.jpg';
+        return Storage::disk('local')->download($photo->original_path, $filename);
+    }
+
+    /** Acceso al pedido: por token en el enlace (?t=) o por sesión de compra. */
+    private function authorizeOrder(Request $request, Order $order): void
+    {
+        $token = (string) $request->query('t', '');
+        $bySession = (bool) session('order_ok_' . $order->id, false);
+        $byToken   = filled($order->token) && hash_equals($order->token, $token);
+
+        abort_unless($bySession || $byToken, 403);
     }
 
     private function gallery(Event $event)
