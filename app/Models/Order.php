@@ -73,4 +73,24 @@ class Order extends Model
     {
         return filled($this->receipt_path);
     }
+
+    /** Enlace personal del cliente para ver/pagar/descargar su pedido. */
+    public function clientUrl(): string
+    {
+        return route('gallery.order', [
+            'slug' => $this->event->slug,
+            'code' => $this->code,
+            't'    => $this->token,
+        ]);
+    }
+
+    /** Número normalizado para wa.me (agrega código de Perú 51 si es celular de 9 dígitos). */
+    public function whatsappNumber(): string
+    {
+        $d = preg_replace('/\D/', '', (string) $this->customer_contact);
+        if (strlen($d) === 9 && str_starts_with($d, '9')) {
+            $d = '51' . $d;
+        }
+        return $d;
+    }
 }

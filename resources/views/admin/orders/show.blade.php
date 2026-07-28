@@ -21,7 +21,7 @@
     <div class="kv"><b>Nombre:</b> {{ $order->customer_name }}</div>
     <div class="kv"><b>WhatsApp / Celular:</b> {{ $order->customer_contact }}</div>
     @if($order->customer_email)<div class="kv"><b>Correo:</b> {{ $order->customer_email }}</div>@endif
-    <a href="https://wa.me/{{ preg_replace('/\D/','',$order->customer_contact) }}" target="_blank" class="btn sm" style="margin-top:12px">Escribir por WhatsApp</a>
+    <a href="https://wa.me/{{ $order->whatsappNumber() }}" target="_blank" class="btn sm" style="margin-top:12px">Escribir por WhatsApp</a>
   </div>
 
   <div class="col card" style="min-width:260px">
@@ -32,6 +32,29 @@
       <div class="kv" style="color:#0b8f6f"><b>{{ $order->applied_label ?: 'Descuento' }}:</b> - {{ $order->event?->currency }} {{ number_format($order->subtotal - $order->total,2) }}</div>
     @endif
     <div class="kv" style="font-size:18px;font-weight:800;margin-top:8px"><b>Total:</b> {{ $order->event?->currency }} {{ number_format($order->total,2) }}</div>
+  </div>
+</div>
+
+{{-- ====== Enlace para el cliente ====== --}}
+@php
+  $msg = $order->isApproved()
+    ? "¡Hola {$order->customer_name}! Tu pago del pedido {$order->code} fue confirmado. Aquí puedes descargar tus fotos en alta resolución, sin marca de agua: {$order->clientUrl()}"
+    : "¡Hola {$order->customer_name}! Aquí puedes ver tu pedido {$order->code} y completar tu pago con Yape: {$order->clientUrl()}";
+  $wa = 'https://wa.me/'.$order->whatsappNumber().'?text='.rawurlencode($msg);
+@endphp
+<div class="card" style="margin-top:16px">
+  <h2>Enlace del cliente {{ $order->isApproved() ? '(para descargar)' : '' }}</h2>
+  <p class="muted" style="font-size:13px;margin-top:0">
+    @if($order->isApproved())
+      El pago está aprobado. Envíale este enlace al cliente por WhatsApp para que descargue sus fotos en alta, sin marca de agua. Es su enlace personal y privado.
+    @else
+      Este es el enlace personal del cliente para ver su pedido, pagar y hacer seguimiento. Puedes enviárselo por WhatsApp.
+    @endif
+  </p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input id="clientlink" readonly value="{{ $order->clientUrl() }}" style="flex:1;min-width:240px">
+    <button type="button" class="btn ghost sm" onclick="navigator.clipboard.writeText(document.getElementById('clientlink').value); this.textContent='¡Copiado!'; setTimeout(()=>this.textContent='Copiar',1500)">Copiar</button>
+    <a href="{{ $wa }}" target="_blank" class="btn sm" style="background:#25d366">Enviar por WhatsApp</a>
   </div>
 </div>
 
