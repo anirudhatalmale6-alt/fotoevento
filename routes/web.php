@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\GalleryController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Analítica (visitas a galerías + previsualizaciones de fotos)
         Route::get('analitica', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::get('analitica/{event}', [AnalyticsController::class, 'show'])->name('analytics.show');
+
+        // Almacenamiento (uso de espacio en R2)
+        Route::get('almacenamiento', [StorageController::class, 'index'])->name('storage.index');
 
         // Configuración (datos de Yape)
         Route::get('configuracion', [SettingsController::class, 'edit'])->name('settings.edit');

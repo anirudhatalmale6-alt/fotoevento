@@ -60,6 +60,7 @@ th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04
       <a href="{{ route('admin.events.index') }}" class="navlink {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Eventos</a>
       <a href="{{ route('admin.orders.index') }}" class="navlink {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Pedidos</a>
       <a href="{{ route('admin.analytics.index') }}" class="navlink {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">Analítica</a>
+      <a href="{{ route('admin.storage.index') }}" class="navlink {{ request()->routeIs('admin.storage.*') ? 'active' : '' }}">Almacenamiento</a>
       <a href="{{ route('admin.settings.edit') }}" class="navlink {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Configuración</a>
     @endauth
     <div class="sp"></div>
