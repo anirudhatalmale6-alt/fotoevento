@@ -34,8 +34,15 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 /* Yape box */
 .yapebox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px;text-align:center}
 .yapehead{display:inline-flex;align-items:center;gap:8px;background:var(--yape);color:#fff;font-weight:800;border-radius:10px;padding:7px 14px;font-size:14px}
-.qr{width:210px;max-width:70%;border-radius:12px;margin:14px auto 6px;display:block;background:#fff;padding:8px}
-.paynum{font-size:22px;font-weight:800;letter-spacing:.02em;margin:6px 0 2px}
+.qr{width:210px;max-width:70%;border-radius:12px;margin:12px auto 6px;display:block;background:#fff;padding:8px}
+.paytip{background:rgba(124,92,255,.12);border:1px solid rgba(124,92,255,.3);color:#c9bcff;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;margin:14px 0 2px;text-align:left}
+.numrow{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.copybtn{background:var(--yape);color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;font-size:13px;cursor:pointer}
+.copybtn:active{transform:scale(.97)}
+.qrwrap{margin-top:14px;text-align:center}
+.qrwrap>summary{color:#b7a6ff;font-size:13px;list-style:none}
+.qrwrap>summary::-webkit-details-marker{display:none}
+.paynum{font-size:26px;font-weight:800;letter-spacing:.03em;margin:0}
 .payacc{color:var(--muted);font-size:13px}
 .payamt{margin-top:10px;font-size:15px}.payamt b{color:var(--gold);font-size:20px}
 .steps{margin:16px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6;text-align:left}
@@ -123,18 +130,32 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
         <div class="err">Tu comprobante anterior no pudo validarse. Por favor verifica el Yapeo y vuelve a enviarlo.</div>
       @endif
 
+      @php $qrurl = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk('public')->url($yape['qr_path']) : null; @endphp
       <div class="yapebox">
         <div class="yapehead">Yape</div>
-        @if(!empty($yape['qr_path']))
-          <img class="qr" src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($yape['qr_path']) }}" alt="QR Yape">
-        @endif
+
         @if(!empty($yape['number']))
-          <div class="paynum">{{ $yape['number'] }}</div>
-          <div class="payacc">{{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>
+          <div class="paytip">📱 ¿Pagas desde este mismo celular? Lo más fácil: <b>yapea directo a este número</b>. (No escanees el QR de esta pantalla: no se puede escanear con el mismo teléfono en el que lo ves.)</div>
+          <div class="numrow">
+            <div class="paynum" id="yapenum">{{ $yape['number'] }}</div>
+            <button type="button" class="copybtn" onclick="copyNum(this)">Copiar número</button>
+          </div>
+          <div class="payacc" style="margin-top:6px">{{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>
         @endif
+
         <div class="payamt">Monto a pagar: <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></div>
+
+        @if($qrurl)
+          <details class="qrwrap">
+            <summary>▸ ¿Estás en una computadora u otro dispositivo? Escanea el QR</summary>
+            <img class="qr" src="{{ $qrurl }}" alt="QR Yape">
+            <a class="btn ghost" href="{{ $qrurl }}" download="yape-joelgarate.png" style="max-width:260px;margin:0 auto">Guardar QR en mi galería</a>
+            <div class="payacc" style="margin-top:8px">Tip: si quieres escanear desde este mismo celular, guarda el QR y ábrelo con la opción de escanear de Yape (subir imagen de la galería).</div>
+          </details>
+        @endif
+
         <ol class="steps">
-          <li>Abre tu app <b>Yape</b> y escanea el QR (o yapea al número que ves arriba).</li>
+          <li>Abre tu app <b>Yape</b> y <b>yapea al número de arriba</b> (o escanea el QR si estás en otra pantalla).</li>
           <li>Paga exactamente <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b>. Si puedes, pon tu referencia <b>{{ $order->code }}</b> en el mensaje.</li>
           <li>Sube la captura del Yape aquí abajo (o ingresa el código de operación) y envía.</li>
           <li>Joel confirma el pago desde su panel y se habilita tu descarga en alta, <b>sin marca de agua</b>.</li>
@@ -157,5 +178,17 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
   </div>
 </div>
 <footer>FotoEvento · Joel Garate Fotografía</footer>
+<script>
+function copyNum(btn){
+  var el=document.getElementById('yapenum');
+  if(!el) return;
+  var n=el.textContent.trim().replace(/\s+/g,'');
+  var done=function(){var t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(function(){btn.textContent=t},1600);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(n).then(done).catch(function(){fallback(n,done);});
+  }else{fallback(n,done);}
+  function fallback(txt,cb){var i=document.createElement('textarea');i.value=txt;i.style.position='fixed';i.style.opacity='0';document.body.appendChild(i);i.focus();i.select();try{document.execCommand('copy');cb();}catch(e){}document.body.removeChild(i);}
+}
+</script>
 </body>
 </html>
