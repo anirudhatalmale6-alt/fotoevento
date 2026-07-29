@@ -14,11 +14,16 @@ class StorageController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->boolean('fresh')) {
-            Cache::forget('storage_usage');
+        // El caché acelera la página, pero si falla (p. ej. permisos) NO debe romperla:
+        // en ese caso se calcula directo.
+        try {
+            if ($request->boolean('fresh')) {
+                Cache::forget('storage_usage');
+            }
+            $data = Cache::remember('storage_usage', 300, fn () => $this->compute());
+        } catch (\Throwable $e) {
+            $data = $this->compute();
         }
-
-        $data = Cache::remember('storage_usage', 300, fn () => $this->compute());
 
         $data['free_bytes'] = self::FREE_BYTES;
         $data['pct'] = self::FREE_BYTES > 0
