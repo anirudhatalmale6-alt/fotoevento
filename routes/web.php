@@ -31,6 +31,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Pedidos (selección de clientes) + pago Yape con aprobación manual.
         Route::get('pedidos', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('pedidos-nuevos', [OrderController::class, 'ping'])->name('orders.ping');
         Route::delete('pedidos', [OrderController::class, 'destroyAll'])->name('orders.destroyAll');
         Route::get('pedidos/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('pedidos/{order}/comprobante', [OrderController::class, 'receipt'])->name('orders.receipt');

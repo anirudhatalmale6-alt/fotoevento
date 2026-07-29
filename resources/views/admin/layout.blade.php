@@ -43,6 +43,10 @@ th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04
 .badge.on{background:#e7f8f1;color:#0b6b52}
 .kv{padding:6px 0;font-size:14px}.kv b{color:var(--muted);font-weight:600;margin-right:4px}
 .navlink{font-weight:700;color:var(--muted);padding:8px 4px}.navlink.active{color:var(--ink)}
+.notifbtn{display:inline-flex;align-items:center;gap:6px;background:#eef1f7;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer}
+.notifbtn.on{background:#e7f8f1;border-color:#b9ead9;color:#0b6b52}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:13px 18px;border-radius:12px;font-size:14px;box-shadow:0 12px 34px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:.25s;z-index:100;max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 </style>
 </head>
 <body>
@@ -60,6 +64,7 @@ th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04
     @endauth
     <div class="sp"></div>
     @auth
+      <button type="button" id="notifBtn" class="notifbtn" title="Activa el sonido y aviso cuando llegue un pedido">🔔 Avisos</button>
       <a href="{{ route('admin.events.create') }}" class="btn sm">+ Nuevo evento</a>
       <form method="post" action="{{ route('admin.logout') }}" style="display:inline">@csrf
         <button class="btn ghost sm">Salir</button>
@@ -75,6 +80,60 @@ th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04
 <script>
 window.CSRF = document.querySelector('meta[name=csrf-token]').content;
 </script>
+@auth
+<div id="notifToast" class="toast"></div>
+<script>
+(function(){
+  const PING="{{ route('admin.orders.ping') }}";
+  let lastId=null, enabled=false, audioCtx=null;
+  function beep(){
+    try{
+      audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended') audioCtx.resume();
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type='sine'; o.frequency.setValueAtTime(880,audioCtx.currentTime);
+      o.frequency.setValueAtTime(660,audioCtx.currentTime+0.15);
+      g.gain.setValueAtTime(0.18,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.35);
+      o.start(); o.stop(audioCtx.currentTime+0.35);
+    }catch(e){}
+  }
+  function toast(html){
+    const t=document.getElementById('notifToast'); if(!t) return;
+    t.innerHTML=html; t.classList.add('show');
+    clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),9000);
+  }
+  async function poll(){
+    try{
+      const r=await fetch(PING,{headers:{'Accept':'application/json'}});
+      if(!r.ok) return;
+      const j=await r.json();
+      if(lastId===null){ lastId=j.max_id; return; }
+      if(j.max_id>lastId){
+        lastId=j.max_id; const l=j.latest;
+        const msg=l?`Nuevo pedido ${l.code} · ${l.name} · ${l.currency} ${l.total}`:'Nuevo pedido recibido';
+        beep();
+        toast(`🎉 ${msg} ${l?`<a href="${l.url}" style="color:#7cf0d0;font-weight:700;margin-left:8px">Ver pedido</a>`:''}`);
+        if('Notification' in window && Notification.permission==='granted'){
+          try{ const n=new Notification('🎉 Nuevo pedido en FotoEvento',{body:msg}); n.onclick=()=>{ if(l&&l.url) window.open(l.url,'_blank'); }; }catch(e){}
+        }
+      }
+    }catch(e){}
+  }
+  const btn=document.getElementById('notifBtn');
+  if(btn){
+    btn.addEventListener('click', async ()=>{
+      enabled=true; beep();
+      if('Notification' in window && Notification.permission!=='granted'){ try{ await Notification.requestPermission(); }catch(e){} }
+      btn.textContent='🔔 Avisos activos'; btn.classList.add('on');
+      toast('Avisos activados ✓ Con esta pestaña abierta te aviso con sonido cuando entre un pedido.');
+    });
+  }
+  poll(); setInterval(poll, 20000);
+})();
+</script>
+@endauth
 @yield('scripts')
 </body>
 </html>

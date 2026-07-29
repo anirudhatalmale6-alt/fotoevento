@@ -15,6 +15,22 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
+    /** Sondeo ligero para avisar de pedidos nuevos en el panel (sonido + notificación). */
+    public function ping()
+    {
+        $latest = Order::with('event')->latest('id')->first();
+        return response()->json([
+            'max_id' => $latest?->id ?? 0,
+            'latest' => $latest ? [
+                'code'     => $latest->code,
+                'name'     => $latest->customer_name,
+                'total'    => number_format((float) $latest->total, 2),
+                'currency' => $latest->event?->currency,
+                'url'      => route('admin.orders.show', $latest),
+            ] : null,
+        ]);
+    }
+
     public function show(Order $order)
     {
         $order->load(['event', 'items.photo']);
