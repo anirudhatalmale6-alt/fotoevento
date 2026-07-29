@@ -102,6 +102,16 @@
   @endif
 </div>
 
+<div class="card" style="margin-top:16px;border-color:#f6c9cb">
+  <h2>Eliminar pedido</h2>
+  <p class="muted" style="font-size:13px;margin-top:0">Quita este pedido de tu panel (por ejemplo, si fue una prueba). No borra las fotos ni el evento, solo el pedido y su comprobante.</p>
+  <form method="post" action="{{ route('admin.orders.destroy',$order) }}"
+        onsubmit="return confirm('¿Eliminar el pedido {{ $order->code }}? Esta acción no se puede deshacer.')">
+    @csrf @method('DELETE')
+    <button class="btn danger sm">🗑️ Eliminar este pedido</button>
+  </form>
+</div>
+
 <div class="card" style="margin-top:16px">
   <h2>Fotos del pedido ({{ $order->items->count() }})</h2>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:6px">

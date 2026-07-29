@@ -7,6 +7,13 @@
     <div class="muted">Selecciones de fotos que hicieron tus clientes desde las galerías.</div>
   </div>
   <div class="sp"></div>
+  @unless($orders->isEmpty())
+    <form method="post" action="{{ route('admin.orders.destroyAll') }}" style="display:inline"
+          onsubmit="return confirm('¿Eliminar TODOS los pedidos y empezar de cero? La numeración volverá a FE-0001. Esto no borra tus fotos ni tus eventos, solo los pedidos. Esta acción no se puede deshacer.')">
+      @csrf @method('DELETE')
+      <button class="btn danger">🗑️ Vaciar todos los pedidos</button>
+    </form>
+  @endunless
   <a href="{{ route('admin.events.index') }}" class="btn ghost">Eventos</a>
 </div>
 
@@ -32,7 +39,14 @@
           <td style="font-weight:700">{{ $o->event?->currency }} {{ number_format($o->total,2) }}</td>
           <td>@php $on = $o->status==='pagado'||$o->status==='entregado'; @endphp
             <span class="badge {{ $on?'on':'' }}">{{ $o->statusLabel() }}</span></td>
-          <td style="text-align:right"><a href="{{ route('admin.orders.show',$o) }}" class="btn ghost sm">Ver</a></td>
+          <td style="text-align:right;white-space:nowrap">
+            <a href="{{ route('admin.orders.show',$o) }}" class="btn ghost sm">Ver</a>
+            <form method="post" action="{{ route('admin.orders.destroy',$o) }}" style="display:inline"
+                  onsubmit="return confirm('¿Eliminar el pedido {{ $o->code }}? Esta acción no se puede deshacer.')">
+              @csrf @method('DELETE')
+              <button class="btn danger sm" title="Eliminar pedido">Eliminar</button>
+            </form>
+          </td>
         </tr>
       @endforeach
       </tbody>

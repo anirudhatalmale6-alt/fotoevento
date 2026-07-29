@@ -29,10 +29,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Pedidos (selección de clientes) + pago Yape con aprobación manual.
         Route::get('pedidos', [OrderController::class, 'index'])->name('orders.index');
+        Route::delete('pedidos', [OrderController::class, 'destroyAll'])->name('orders.destroyAll');
         Route::get('pedidos/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('pedidos/{order}/comprobante', [OrderController::class, 'receipt'])->name('orders.receipt');
         Route::post('pedidos/{order}/aprobar', [OrderController::class, 'approve'])->name('orders.approve');
         Route::post('pedidos/{order}/rechazar', [OrderController::class, 'reject'])->name('orders.reject');
+        Route::delete('pedidos/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
         // Configuración (datos de Yape)
         Route::get('configuracion', [SettingsController::class, 'edit'])->name('settings.edit');
