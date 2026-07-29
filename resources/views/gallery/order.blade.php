@@ -68,6 +68,11 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .field input[type=text]{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
 .filebox{border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;background:var(--panel2)}
 .filebox.has{color:var(--brand2);border-color:var(--brand2)}
+.fhint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.opwrap{margin:10px 0 4px}
+.opwrap>summary{color:var(--muted);font-size:12px;cursor:pointer;list-style:none}
+.opwrap>summary::-webkit-details-marker{display:none}
+.opwrap input[type=text]{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
 .btn{display:block;width:100%;text-align:center;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:14px;font-weight:800;margin-top:14px;text-decoration:none;cursor:pointer;font-size:15px}
 .btn.gold{background:var(--gold);color:#221a08}
 .btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
@@ -176,7 +181,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
         <ol class="steps">
           <li>Abre tu app <b>Yape</b> y <b>yapea al número de arriba</b> (o escanea el QR si estás en otra pantalla).</li>
           <li>Paga exactamente <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b>. Si puedes, pon tu referencia <b>{{ $order->code }}</b> en el mensaje.</li>
-          <li>Sube la captura del Yape aquí abajo (o ingresa el código de operación) y envía.</li>
+          <li>Sube la captura de tu Yape aquí abajo y envía. Con la captura es suficiente.</li>
           <li>Joel confirma el pago desde su panel y se habilita tu descarga en alta, <b>sin marca de agua</b>.</li>
         </ol>
       </div>
