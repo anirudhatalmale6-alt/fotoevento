@@ -83,6 +83,7 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .dl img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block}
 .dl a{display:block;text-align:center;padding:9px;font-size:13px;font-weight:700;color:var(--brand2);text-decoration:none}
 .note{margin-top:16px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px;font-size:13px;color:var(--muted);line-height:1.6}.note b{color:var(--txt)}
+.dltip{margin-top:12px;background:rgba(0,209,178,.12);border:1px solid rgba(0,209,178,.35);color:var(--brand2);border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;text-align:center;font-weight:600}
 details{margin-top:12px}summary{cursor:pointer;color:var(--muted);font-size:13px}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 </style>
@@ -124,6 +125,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
     {{-- ====== ESTADO: APROBADO -> descargas ====== --}}
     @if($st==='aprobado')
       <p style="text-align:center;color:var(--muted);font-size:14px;margin:16px 0 0">Tus fotos en alta resolución, sin marca de agua, ya están listas para descargar. 🎉</p>
+      <div class="dltip">📲 Una vez que termine la descarga, la foto se guarda directo en la galería de tu teléfono.</div>
       <div class="dlgrid">
         @foreach($order->items as $it)
           <div class="dl">
