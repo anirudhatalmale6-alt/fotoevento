@@ -113,7 +113,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-a
   <img id="lbImg" src="" alt="">
   <div class="lbbar">
     <span class="lbcode" id="lbCode"></span>
-    <button class="btn" id="lbBuy">Agregar a mi selección</button>
+    <button class="btn" id="lbBuy">♥ Me encanta esta foto</button>
   </div>
 </div>
 
@@ -123,7 +123,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-a
     <div class="info"><span id="count">0</span> foto(s) · <b id="barTotal">{{ $event->currency }} 0.00</b>
       <div class="sub" id="barSub"></div>
     </div>
-    <button class="btn" id="openCart">Ver selección</button>
+    <button class="btn" id="openCart">Ver mis favoritas</button>
   </div>
 </div>
 
@@ -322,7 +322,7 @@ function openLb(i){
 function updateLbBtn(){
   const p=EVENT.photos[lbIndex]; if(!p) return;
   const on=selected.has(p.id); const b=$('#lbBuy');
-  b.textContent = on ? 'Quitar de mi selección' : 'Agregar a mi selección';
+  b.textContent = on ? '♥ Quitar de mis favoritas' : '♥ Me encanta esta foto';
   b.classList.toggle('on', on);
 }
 $('#lbBuy').addEventListener('click', ()=> toggle(EVENT.photos[lbIndex].id));
