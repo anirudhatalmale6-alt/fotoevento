@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Marca de agua por defecto
+    |--------------------------------------------------------------------------
+    |
+    | Texto que se usa como marca de agua cuando un evento no define uno propio.
+    | Se elige una frase disuasiva ("sin pagar") para que quien repostee una
+    | captura de la muestra quede en evidencia de no haberla comprado.
+    |
+    */
+
+    'default_watermark' => env('DEFAULT_WATERMARK', 'MUESTRA NO PAGADO'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

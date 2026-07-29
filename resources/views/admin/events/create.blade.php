@@ -37,7 +37,7 @@
     <div class="row" style="margin-top:14px">
       <div class="col" style="min-width:260px">
         <label>Texto de la marca de agua</label>
-        <input name="watermark_text" value="{{ old('watermark_text','JoelGarateFotografia') }}" maxlength="60">
+        <input name="watermark_text" value="{{ old('watermark_text', config('app.default_watermark','MUESTRA NO PAGADO')) }}" maxlength="60">
       </div>
     </div>
   </div>
