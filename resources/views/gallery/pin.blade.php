@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ $event->name }} — Galería privada</title>
+@include('gallery.partials.og', ['event' => $event])
 <style>
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   background:radial-gradient(1200px 700px at 70% -10%,#20263a,#0b0d12 60%);color:#eef1f6;
