@@ -45,6 +45,22 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .paynum{font-size:26px;font-weight:800;letter-spacing:.03em;margin:0}
 .payacc{color:var(--muted);font-size:13px}
 .payamt{margin-top:10px;font-size:15px}.payamt b{color:var(--gold);font-size:20px}
+.qrblock{margin-top:14px;background:#fff;border-radius:14px;padding:14px 12px}
+.qrblock .qrttl{color:#111;font-weight:700;font-size:14px;margin:0 0 4px}
+.qrblock .qr{width:240px;max-width:78%;margin:8px auto 4px;padding:6px}
+.qrbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.qrbtns .btn{max-width:220px}
+.qrhint{color:#555;font-size:12px;line-height:1.5;margin-top:10px}
+/* QR a pantalla completa (captura limpia para escanear) */
+.qrfull{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px}
+.qrfull.open{display:flex}
+.qrfull-card{background:#fff;color:#111;border-radius:20px;padding:24px 20px;max-width:420px;width:100%;text-align:center}
+.qrfull-title{font-weight:800;font-size:18px;color:#111;margin:0 0 14px}
+.qrfull-img{width:min(80vw,340px);height:auto;display:block;margin:0 auto;background:#fff;padding:6px;border-radius:10px}
+.qrfull-amt{font-size:24px;font-weight:800;color:#111;margin-top:14px}
+.qrfull-num{font-size:14px;color:#333;margin-top:2px}
+.qrfull-hint{font-size:12px;color:#666;line-height:1.5;margin:14px 0 16px}
+.qrfull-card .btn{width:100%;max-width:none}
 .steps{margin:16px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6;text-align:left}
 .steps b{color:var(--txt)}
 /* form */
@@ -146,12 +162,15 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
         <div class="payamt">Monto a pagar: <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></div>
 
         @if($qrurl)
-          <details class="qrwrap">
-            <summary>▸ ¿Estás en una computadora u otro dispositivo? Escanea el QR</summary>
+          <div class="qrblock">
+            <div class="qrttl">Pagar escaneando el QR</div>
             <img class="qr" src="{{ $qrurl }}" alt="QR Yape">
-            <a class="btn ghost" href="{{ $qrurl }}" download="yape-joelgarate.png" style="max-width:260px;margin:0 auto">Guardar QR en mi galería</a>
-            <div class="payacc" style="margin-top:8px">Tip: si quieres escanear desde este mismo celular, guarda el QR y ábrelo con la opción de escanear de Yape (subir imagen de la galería).</div>
-          </details>
+            <div class="qrbtns">
+              <button type="button" class="btn" onclick="openQR()">🔍 Ver QR grande</button>
+              <a class="btn ghost" href="{{ $qrurl }}" download="yape-joelgarate.png">Guardar QR</a>
+            </div>
+            <div class="qrhint">Para escanear desde OTRO celular, toca “Ver QR grande” y apúntalo. Si quieres subirlo desde la galería de Yape, abre “Ver QR grande” y toma la captura ahí: se ve limpio y grande, sin letras alrededor, para que no salga error al escanear.</div>
+          </div>
         @endif
 
         <ol class="steps">
@@ -177,8 +196,24 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
     <a href="{{ route('gallery.show', $event->slug) }}" class="btn ghost">Volver a la galería</a>
   </div>
 </div>
+@php $qrurlFull = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) : null; @endphp
+@if($qrurlFull && $st!=='aprobado')
+<div class="qrfull" id="qrFull" onclick="if(event.target===this)closeQR()">
+  <div class="qrfull-card">
+    <div class="qrfull-title">Escanea este código con Yape</div>
+    <img class="qrfull-img" src="{{ $qrurlFull }}" alt="QR Yape">
+    <div class="qrfull-amt">{{ $event->currency }} {{ number_format($order->total,2) }}</div>
+    @if(!empty($yape['number']))<div class="qrfull-num">{{ $yape['number'] }} · {{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>@endif
+    <div class="qrfull-hint">Si vas a subir el QR desde la galería de Yape, toma la captura de esta pantalla: se ve grande y limpio, sin nada alrededor.</div>
+    <button type="button" class="btn ghost" onclick="closeQR()">Cerrar</button>
+  </div>
+</div>
+@endif
 <footer>FotoEvento · Joel Garate Fotografía</footer>
 <script>
+function openQR(){var m=document.getElementById('qrFull');if(m)m.classList.add('open');}
+function closeQR(){var m=document.getElementById('qrFull');if(m)m.classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeQR();});
 function copyNum(btn){
   var el=document.getElementById('yapenum');
   if(!el) return;
