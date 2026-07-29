@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Aviso por WhatsApp al fotógrafo cuando entra un pedido (CallMeBot, gratis).
+    'callmebot' => [
+        'phone'  => env('WHATSAPP_NOTIFY_PHONE'),   // número del fotógrafo con código de país (+51...)
+        'apikey' => env('CALLMEBOT_APIKEY'),
+    ],
+
 ];

@@ -102,6 +102,9 @@ class GalleryController extends Controller
 
         $request->session()->put('order_ok_' . $order->id, true);
 
+        // Aviso por WhatsApp al fotógrafo (después de responder, no retrasa al cliente).
+        defer(fn () => (new \App\Services\WhatsAppNotifier)->notifyNewOrder($order));
+
         return redirect()->route('gallery.order', [
             'slug' => $event->slug, 'code' => $order->code, 't' => $order->token,
         ]);
