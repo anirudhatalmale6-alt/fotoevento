@@ -76,6 +76,8 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .btn{display:block;width:100%;text-align:center;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:14px;font-weight:800;margin-top:14px;text-decoration:none;cursor:pointer;font-size:15px}
 .btn.gold{background:var(--gold);color:#221a08}
 .btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+.btn.wa{background:#25d366;color:#0a2e18}
+.eta{margin-top:12px;background:rgba(232,193,122,.12);border:1px solid rgba(232,193,122,.35);color:var(--gold);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600}
 .dlgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px}
 .dl{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel2)}
 .dl img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block}
@@ -107,7 +109,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       <span class="badge {{ $st==='aprobado'?'ok':($st==='rechazado'?'bad':($st==='comprobante'?'rev':'pend')) }}">{{ $order->statusLabel() }}</span>
     </div>
 
-    @if(session('flash')==='comprobante')<div class="flash">¡Gracias! Recibimos tu comprobante. Joel lo revisará y aprobará tu pedido a la brevedad.</div>@endif
+    @if(session('flash')==='comprobante')<div class="flash">¡Gracias! Recibimos tu comprobante. En cuanto confirmemos tu Yapeo te enviaremos tus fotos a tu WhatsApp. 💬</div>@endif
     @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
 
     {{-- Resumen del pedido --}}
@@ -137,8 +139,17 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       <div class="yapebox">
         <div class="ring wait" style="margin-top:4px">⏳</div>
         <div style="font-weight:700">Tu pago está en revisión</div>
-        <p style="color:var(--muted);font-size:13px;margin:8px 0 0">Joel confirmará tu Yapeo y se habilitará la descarga de tus fotos en alta. Puedes volver a esta pantalla con tu enlace para ver el avance.</p>
-        @if($order->op_code)<p style="color:var(--muted);font-size:13px;margin:6px 0 0">Código de operación: <b style="color:var(--txt)">{{ $order->op_code }}</b></p>@endif
+        <p style="color:var(--muted);font-size:14px;margin:8px 0 0;line-height:1.6">¡Gracias! Recibimos tu comprobante. En cuanto confirmemos tu Yapeo, te enviaremos tus fotos en alta definición directamente a tu WhatsApp. Ya puedes cerrar esta pantalla con tranquilidad.</p>
+        <div class="eta">⏳ Tiempo promedio de validación: 5 a 15 minutos.</div>
+        @if($order->op_code)<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Código de operación: <b style="color:var(--txt)">{{ $order->op_code }}</b></p>@endif
+        @php
+          $waNum = preg_replace('/\D/', '', $yape['number'] ?? '');
+          if (strlen($waNum) === 9) { $waNum = '51'.$waNum; } // Perú
+          $waMsg = 'Hola, ya subí mi comprobante '.$order->code.' para las fotos de "'.$event->name.'". Mi nombre: '.$order->customer_name.'.';
+        @endphp
+        @if($waNum)
+          <a class="btn wa" href="https://wa.me/{{ $waNum }}?text={{ rawurlencode($waMsg) }}" target="_blank">💬 Consultar por WhatsApp</a>
+        @endif
       </div>
       <details>
         <summary>¿Te equivocaste de comprobante? Enviar otro</summary>
@@ -198,7 +209,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       </div>
     @endif
 
-    <a href="{{ route('gallery.show', $event->slug) }}" class="btn ghost">Volver a la galería</a>
+    <a href="{{ route('gallery.show', $event->slug) }}" class="btn ghost">Seguir viendo la galería</a>
   </div>
 </div>
 @php $qrurlFull = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) : null; @endphp
