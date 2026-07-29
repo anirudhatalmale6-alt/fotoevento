@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\OrderController;
@@ -36,6 +37,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('pedidos/{order}/rechazar', [OrderController::class, 'reject'])->name('orders.reject');
         Route::delete('pedidos/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
+        // Analítica (visitas a galerías + previsualizaciones de fotos)
+        Route::get('analitica', [AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('analitica/{event}', [AnalyticsController::class, 'show'])->name('analytics.show');
+
         // Configuración (datos de Yape)
         Route::get('configuracion', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('configuracion', [SettingsController::class, 'update'])->name('settings.update');
@@ -48,6 +53,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 /* ---------- Galería pública (por enlace + PIN) ---------- */
 Route::get('/g/{slug}', [GalleryController::class, 'show'])->name('gallery.show');
 Route::post('/g/{slug}/acceso', [GalleryController::class, 'unlock'])->name('gallery.unlock');
+Route::post('/g/{slug}/track', [GalleryController::class, 'track'])->name('gallery.track');
 Route::post('/g/{slug}/pedido', [GalleryController::class, 'storeOrder'])->name('gallery.order.store');
 Route::get('/g/{slug}/pedido/{code}', [GalleryController::class, 'order'])->name('gallery.order');
 Route::post('/g/{slug}/pedido/{code}/comprobante', [GalleryController::class, 'uploadReceipt'])->name('gallery.order.receipt');

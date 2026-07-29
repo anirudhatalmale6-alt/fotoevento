@@ -295,11 +295,28 @@ $('#orderForm').addEventListener('submit', e=>{
   $('#confirmOrder').disabled=true; $('#confirmOrder').textContent='Enviando...';
 });
 
+/* ---- Analítica: registra la previsualización de una foto (sin datos personales) ---- */
+const TRACK_URL = "{{ route('gallery.track', $event->slug) }}";
+const CSRF = document.querySelector('meta[name=csrf-token]').content;
+const tracked = new Set();
+function trackPreview(photoId){
+  if(tracked.has(photoId)) return;   // una sola vez por sesión y foto
+  tracked.add(photoId);
+  try{
+    fetch(TRACK_URL, {
+      method:'POST', keepalive:true,
+      headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
+      body: JSON.stringify({type:'photo_preview', photo_id:photoId})
+    }).catch(()=>{});
+  }catch(e){}
+}
+
 /* ---- Lightbox ---- */
 function openLb(i){
   lbIndex=i; const p=EVENT.photos[i];
   $('#lbImg').src=p.full; $('#lbCode').textContent=p.code;
   updateLbBtn(); $('#lb').classList.add('open');
+  trackPreview(p.id);
 }
 function updateLbBtn(){
   const p=EVENT.photos[lbIndex]; if(!p) return;
