@@ -45,14 +45,22 @@
 
 <!-- Grilla de fotos -->
 <div class="card">
-  <div style="display:flex;align-items:center;margin-bottom:12px">
+  <style>
+    .ph.is-cover{outline:3px solid var(--brand);outline-offset:-3px}
+    .coverbtn{position:absolute;top:6px;left:6px;border:none;background:rgba(0,0,0,.55);color:#fff;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:600;cursor:pointer}
+    .ph.is-cover .coverbtn{background:var(--brand)}
+  </style>
+  <div style="display:flex;align-items:center;margin-bottom:6px">
     <h2 style="margin:0">Fotos del evento (<span id="count">{{ $event->photos_count }}</span>)</h2>
     <div class="sp" style="flex:1"></div>
   </div>
+  <p class="muted" style="margin:0 0 12px;font-size:13px">La foto marcada como ★ Portada es la que aparece al compartir el enlace (WhatsApp, etc.). Si no eliges ninguna, se usa la primera. Pasa el cursor sobre una foto y toca “Portada”.</p>
   <div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
     @foreach($event->photos as $p)
-      <div class="ph" data-id="{{ $p->id }}" style="position:relative;border-radius:10px;overflow:hidden;aspect-ratio:3/2;background:#eef1f7">
+      @php $isCover = $event->cover_photo_id == $p->id; @endphp
+      <div class="ph {{ $isCover?'is-cover':'' }}" data-id="{{ $p->id }}" style="position:relative;border-radius:10px;overflow:hidden;aspect-ratio:3/2;background:#eef1f7">
         <img src="{{ $p->thumbUrl() }}" style="width:100%;height:100%;object-fit:cover">
+        <button onclick="setCover({{ $p->id }})" title="Usar como portada" class="coverbtn">{{ $isCover?'★ Portada':'☆ Portada' }}</button>
         <button onclick="delPhoto({{ $p->id }})" title="Eliminar"
           style="position:absolute;top:6px;right:6px;border:none;background:rgba(0,0,0,.55);color:#fff;border-radius:8px;width:26px;height:26px;cursor:pointer">✕</button>
       </div>
@@ -151,9 +159,23 @@ function addTile(p){
   d.className='ph'; d.dataset.id=p.id;
   d.style.cssText='position:relative;border-radius:10px;overflow:hidden;aspect-ratio:3/2;background:#eef1f7';
   d.innerHTML=`<img src="${p.thumb}" style="width:100%;height:100%;object-fit:cover">
+    <button title="Usar como portada" class="coverbtn">☆ Portada</button>
     <button title="Eliminar" style="position:absolute;top:6px;right:6px;border:none;background:rgba(0,0,0,.55);color:#fff;border-radius:8px;width:26px;height:26px;cursor:pointer">✕</button>`;
-  d.querySelector('button').onclick=()=>delPhoto(p.id);
+  d.querySelector('.coverbtn').onclick=()=>setCover(p.id);
+  d.querySelectorAll('button')[1].onclick=()=>delPhoto(p.id);
   g.prepend(d);
+}
+async function setCover(id){
+  const r=await fetch(`/admin/eventos/${EV}/portada/${id}`,{method:'POST',headers:{'X-CSRF-TOKEN':window.CSRF,'Accept':'application/json'}});
+  const j=await r.json();
+  if(j.ok){
+    document.querySelectorAll('.ph').forEach(ph=>{
+      ph.classList.remove('is-cover');
+      const b=ph.querySelector('.coverbtn'); if(b) b.textContent='☆ Portada';
+    });
+    const t=document.querySelector(`.ph[data-id="${id}"]`);
+    if(t){ t.classList.add('is-cover'); const b=t.querySelector('.coverbtn'); if(b) b.textContent='★ Portada'; }
+  }
 }
 async function delPhoto(id){
   if(!confirm('¿Eliminar esta foto?')) return;

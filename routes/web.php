@@ -27,6 +27,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('eventos/{event}/fotos', [EventController::class, 'uploadPhotos'])->name('events.photos.upload');
         Route::delete('eventos/{event}/fotos/{photo}', [EventController::class, 'destroyPhoto'])->name('events.photos.destroy');
+        Route::post('eventos/{event}/portada/{photo}', [EventController::class, 'setCover'])->name('events.cover');
 
         // Pedidos (selección de clientes) + pago Yape con aprobación manual.
         Route::get('pedidos', [OrderController::class, 'index'])->name('orders.index');

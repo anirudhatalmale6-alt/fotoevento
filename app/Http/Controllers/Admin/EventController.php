@@ -132,6 +132,14 @@ class EventController extends Controller
         return response()->json(['ok' => true, 'saved' => $saved, 'total' => $event->photos()->count()]);
     }
 
+    /** Elige la foto de portada (la que se muestra al compartir el enlace). */
+    public function setCover(Event $event, Photo $photo)
+    {
+        abort_unless($photo->event_id === $event->id, 404);
+        $event->update(['cover_photo_id' => $photo->id]);
+        return response()->json(['ok' => true, 'cover_id' => $photo->id]);
+    }
+
     public function destroyPhoto(Event $event, Photo $photo)
     {
         abort_unless($photo->event_id === $event->id, 404);

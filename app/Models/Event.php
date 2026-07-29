@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -10,7 +11,7 @@ class Event extends Model
 {
     protected $fillable = [
         'name', 'slug', 'event_date', 'pin', 'currency',
-        'price_unit', 'watermark_text', 'cover_thumb', 'published',
+        'price_unit', 'watermark_text', 'cover_thumb', 'cover_photo_id', 'published',
     ];
 
     protected $casts = [
@@ -27,6 +28,18 @@ class Event extends Model
     public function packages(): HasMany
     {
         return $this->hasMany(EventPackage::class)->orderBy('qty');
+    }
+
+    public function coverPhoto(): BelongsTo
+    {
+        return $this->belongsTo(Photo::class, 'cover_photo_id');
+    }
+
+    /** Foto usada en la vista previa al compartir el enlace (portada elegida o la primera). */
+    public function shareImageUrl(): ?string
+    {
+        $photo = $this->coverPhoto ?: $this->photos()->first();
+        return $photo?->previewUrl();
     }
 
     public static function makeUniqueSlug(string $name): string

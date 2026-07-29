@@ -2,7 +2,7 @@
 @php
   $ogTitle = $event->name.' · Joel Garate Fotografía';
   $ogDesc  = 'Mira y elige tus fotos del evento '.$event->name.'. Galería privada — descarga en alta tras el pago.';
-  $ogImg   = optional($event->photos()->first())->previewUrl();
+  $ogImg   = $event->shareImageUrl();
 @endphp
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Joel Garate Fotografía">
