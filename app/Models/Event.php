@@ -12,6 +12,7 @@ class Event extends Model
     protected $fillable = [
         'name', 'slug', 'event_date', 'pin', 'currency',
         'price_unit', 'watermark_text', 'cover_thumb', 'cover_photo_id', 'published',
+        'photos_count',
     ];
 
     protected $casts = [
