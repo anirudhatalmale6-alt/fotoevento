@@ -130,7 +130,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
         <div class="err">Tu comprobante anterior no pudo validarse. Por favor verifica el Yapeo y vuelve a enviarlo.</div>
       @endif
 
-      @php $qrurl = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk('public')->url($yape['qr_path']) : null; @endphp
+      @php $qrurl = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) : null; @endphp
       <div class="yapebox">
         <div class="yapehead">Yape</div>
 

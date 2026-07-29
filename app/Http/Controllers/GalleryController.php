@@ -145,10 +145,10 @@ class GalleryController extends Controller
         // El comprobante se guarda en disco PRIVADO (sólo lo ve el fotógrafo desde su panel).
         if ($request->hasFile('receipt')) {
             if ($order->receipt_path) {
-                Storage::disk('local')->delete($order->receipt_path);
+                Storage::disk(config('storage.private_disk'))->delete($order->receipt_path);
             }
             $order->receipt_path = $request->file('receipt')
-                ->store("receipts/{$event->id}", 'local');
+                ->store("receipts/{$event->id}", config('storage.private_disk'));
         }
 
         $order->op_code = $request->input('op_code');
@@ -172,10 +172,11 @@ class GalleryController extends Controller
         abort_unless($item->order_id === $order->id, 404);
 
         $photo = $item->photo;
-        abort_unless($photo && Storage::disk('local')->exists($photo->original_path), 404);
+        $disk  = Storage::disk(config('storage.private_disk'));
+        abort_unless($photo && $disk->exists($photo->original_path), 404);
 
         $filename = ($item->code ?: 'foto') . '.jpg';
-        return Storage::disk('local')->download($photo->original_path, $filename);
+        return $disk->download($photo->original_path, $filename);
     }
 
     /** Acceso al pedido: por token en el enlace (?t=) o por sesión de compra. */

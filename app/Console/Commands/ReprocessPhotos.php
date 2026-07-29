@@ -24,8 +24,8 @@ class ReprocessPhotos extends Command
 
     public function handle(WatermarkService $wm): int
     {
-        $private = Storage::disk('local');
-        $public  = Storage::disk('public');
+        $private = Storage::disk(config('storage.private_disk'));
+        $public  = Storage::disk(config('storage.public_disk'));
 
         $query = Photo::query()->with('event');
         if ($eventId = $this->option('event')) {

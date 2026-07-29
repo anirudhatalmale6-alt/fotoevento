@@ -20,11 +20,11 @@ class Photo extends Model
 
     public function previewUrl(): string
     {
-        return Storage::disk('public')->url($this->preview_path);
+        return Storage::disk(config('storage.public_disk'))->url($this->preview_path);
     }
 
     public function thumbUrl(): string
     {
-        return Storage::disk('public')->url($this->thumb_path);
+        return Storage::disk(config('storage.public_disk'))->url($this->thumb_path);
     }
 }

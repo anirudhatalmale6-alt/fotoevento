@@ -30,9 +30,9 @@ class SettingsController extends Controller
         if ($request->hasFile('yape_qr')) {
             $old = Setting::get('yape_qr_path');
             if ($old) {
-                Storage::disk('public')->delete($old);
+                Storage::disk(config('storage.public_disk'))->delete($old);
             }
-            $path = $request->file('yape_qr')->store('settings', 'public');
+            $path = $request->file('yape_qr')->store('settings', config('storage.public_disk'));
             Setting::put('yape_qr_path', $path);
         }
 

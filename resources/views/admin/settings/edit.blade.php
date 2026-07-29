@@ -27,7 +27,7 @@
       <h2>Código QR de Yape</h2>
       <p class="muted" style="font-size:13px;margin-top:0">Sube una captura/foto de tu QR desde la app de Yape. El cliente lo escaneará para pagarte.</p>
       @if(!empty($yape['qr_path']))
-        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($yape['qr_path']) }}" alt="QR actual"
+        <img src="{{ \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) }}" alt="QR actual"
              style="width:160px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px;display:block;margin-bottom:10px">
         <div class="muted" style="font-size:12px;margin-bottom:10px">QR actual. Sube uno nuevo para reemplazarlo.</div>
       @endif

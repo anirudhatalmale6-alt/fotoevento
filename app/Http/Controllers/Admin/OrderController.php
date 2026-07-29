@@ -24,8 +24,9 @@ class OrderController extends Controller
     /** Muestra el comprobante de Yape (guardado en disco privado). */
     public function receipt(Order $order)
     {
-        abort_unless($order->receipt_path && Storage::disk('local')->exists($order->receipt_path), 404);
-        return response()->file(Storage::disk('local')->path($order->receipt_path));
+        $disk = Storage::disk(config('storage.private_disk'));
+        abort_unless($order->receipt_path && $disk->exists($order->receipt_path), 404);
+        return $disk->response($order->receipt_path);
     }
 
     /** El fotógrafo confirma el pago -> habilita la descarga en alta. */
@@ -79,8 +80,9 @@ class OrderController extends Controller
     /** Elimina del disco privado el comprobante asociado a un pedido, si existe. */
     private function deleteReceipt(Order $order): void
     {
-        if ($order->receipt_path && Storage::disk('local')->exists($order->receipt_path)) {
-            Storage::disk('local')->delete($order->receipt_path);
+        $disk = Storage::disk(config('storage.private_disk'));
+        if ($order->receipt_path && $disk->exists($order->receipt_path)) {
+            $disk->delete($order->receipt_path);
         }
     }
 }

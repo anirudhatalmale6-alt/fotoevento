@@ -60,6 +60,37 @@ return [
             'report' => false,
         ],
 
+        /*
+         | Cloudflare R2 (S3-compatible). Dos discos sobre R2:
+         |  - r2public: fotos CON marca de agua (previews/miniaturas/QR). Bucket con
+         |    acceso público (r2.dev); R2_PUBLIC_URL alimenta ->url().
+         |  - r2: originales y comprobantes. Bucket PRIVADO (acceso sólo por el servidor).
+         */
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_BUCKET_PRIVATE', 'joelgarate-originales'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => env('R2_USE_PATH_STYLE', true),
+            'throw' => false,
+            'report' => false,
+        ],
+
+        'r2public' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_BUCKET_PUBLIC', 'joelgarate-fotos'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'url' => env('R2_PUBLIC_URL'),
+            'use_path_style_endpoint' => env('R2_USE_PATH_STYLE', true),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

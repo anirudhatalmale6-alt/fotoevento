@@ -73,8 +73,8 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
-        Storage::disk('public')->deleteDirectory('events/' . $event->id);
-        Storage::disk('local')->deleteDirectory('events/' . $event->id);
+        Storage::disk(config('storage.public_disk'))->deleteDirectory('events/' . $event->id);
+        Storage::disk(config('storage.private_disk'))->deleteDirectory('events/' . $event->id);
         $event->delete();
         return redirect()->route('admin.events.index')->with('ok', 'Evento eliminado.');
     }
@@ -90,8 +90,8 @@ class EventController extends Controller
             'photos.*' => ['image', 'mimes:jpg,jpeg,png', 'max:25600'], // 25MB/foto
         ]);
 
-        $public  = Storage::disk('public');   // previews + miniaturas (visibles)
-        $private = Storage::disk('local');     // originales SIN marca (nunca accesibles por web)
+        $public  = Storage::disk(config('storage.public_disk'));   // previews + miniaturas (visibles)
+        $private = Storage::disk(config('storage.private_disk')); // originales SIN marca (nunca accesibles por web)
         $dirOrig    = "events/{$event->id}/orig";
         $dirPreview = "events/{$event->id}/preview";
         $dirThumb   = "events/{$event->id}/thumb";
@@ -135,8 +135,8 @@ class EventController extends Controller
     public function destroyPhoto(Event $event, Photo $photo)
     {
         abort_unless($photo->event_id === $event->id, 404);
-        Storage::disk('local')->delete($photo->original_path);
-        Storage::disk('public')->delete([$photo->preview_path, $photo->thumb_path]);
+        Storage::disk(config('storage.private_disk'))->delete($photo->original_path);
+        Storage::disk(config('storage.public_disk'))->delete([$photo->preview_path, $photo->thumb_path]);
         $photo->delete();
         $event->update(['photos_count' => $event->photos()->count()]);
 
