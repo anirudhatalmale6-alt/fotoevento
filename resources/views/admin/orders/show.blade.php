@@ -8,11 +8,7 @@
     <div class="muted">{{ $order->created_at->format('d/m/Y H:i') }} · {{ $order->event?->name }}</div>
   </div>
   <div class="sp"></div>
-  @php
-    $on = $order->status==='aprobado';
-    $cls = $order->status==='aprobado' ? 'on' : ($order->status==='rechazado' ? 'bad' : '');
-  @endphp
-  <span class="badge {{ $on?'on':'' }}" style="font-size:14px;padding:8px 14px">{{ $order->statusLabel() }}</span>
+  <span class="badge {{ $order->statusBadge() }}" style="font-size:14px;padding:8px 14px">{{ $order->statusLabel() }}</span>
 </div>
 
 <div class="row">

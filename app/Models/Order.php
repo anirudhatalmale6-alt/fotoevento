@@ -64,6 +64,17 @@ class Order extends Model
         };
     }
 
+    /** Clase de color para la etiqueta de estado en el panel. */
+    public function statusBadge(): string
+    {
+        return match ($this->status) {
+            'aprobado'    => 'on',    // verde
+            'rechazado'   => 'bad',   // rojo
+            'comprobante' => 'wait',  // ámbar (esperando revisión)
+            default       => '',      // gris (pendiente)
+        };
+    }
+
     public function isApproved(): bool
     {
         return $this->status === 'aprobado';
