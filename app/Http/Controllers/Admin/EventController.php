@@ -71,6 +71,18 @@ class EventController extends Controller
         return back()->with('ok', 'Datos del evento actualizados.');
     }
 
+    /** Activa o pausa el evento. Pausado = la galería deja de estar disponible para los clientes. */
+    public function toggleActive(Event $event)
+    {
+        $event->update(['published' => ! $event->published]);
+
+        $msg = $event->published
+            ? 'Evento activado. La galería ya está disponible para tus clientes.'
+            : 'Evento pausado. Los clientes ya no pueden ver ni comprar en esta galería. Puedes reactivarlo cuando quieras.';
+
+        return back()->with('ok', $msg);
+    }
+
     public function destroy(Event $event)
     {
         Storage::disk(config('storage.public_disk'))->deleteDirectory('events/' . $event->id);

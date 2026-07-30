@@ -16,10 +16,23 @@ use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
+    /**
+     * Busca un evento disponible por slug. Si está pausado (published=false)
+     * muestra una página amable "no disponible" en lugar de un error 404.
+     */
+    private function liveEvent(string $slug): Event
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        if (! $event->published) {
+            abort(response()->view('gallery.paused', [], 200));
+        }
+        return $event;
+    }
+
     // Página de acceso (pide PIN si el evento tiene uno)
     public function show(string $slug)
     {
-        $event = Event::where('slug', $slug)->where('published', true)->firstOrFail();
+        $event = $this->liveEvent($slug);
 
         if (blank($event->pin) || $this->unlocked($event)) {
             return $this->gallery($event);
@@ -29,7 +42,7 @@ class GalleryController extends Controller
 
     public function unlock(Request $request, string $slug)
     {
-        $event = Event::where('slug', $slug)->where('published', true)->firstOrFail();
+        $event = $this->liveEvent($slug);
         $pin = (string) $request->input('pin');
 
         if (blank($event->pin) || hash_equals($event->pin, $pin)) {
@@ -45,7 +58,7 @@ class GalleryController extends Controller
      */
     public function storeOrder(Request $request, string $slug, PricingService $pricing)
     {
-        $event = Event::where('slug', $slug)->where('published', true)->firstOrFail();
+        $event = $this->liveEvent($slug);
 
         if (filled($event->pin) && ! $this->unlocked($event)) {
             abort(403);

@@ -3,9 +3,15 @@
 @section('content')
 <div class="pagehead">
   <a href="{{ route('admin.events.index') }}" class="btn ghost sm">← Eventos</a>
-  <div><h1>{{ $event->name }}</h1>
+  <div><h1 style="display:inline-flex;align-items:center;gap:10px">{{ $event->name }}
+    <span class="badge {{ $event->published ? 'on' : 'wait' }}" style="font-size:12px">{{ $event->published ? '● Activo' : '⏸ Pausado' }}</span></h1>
     <div class="muted">{{ $event->photos_count }} fotos · {{ $event->currency }} {{ number_format($event->price_unit,2) }} por foto</div></div>
   <div class="sp"></div>
+  <form method="post" action="{{ route('admin.events.toggle',$event) }}" style="display:inline"
+        onsubmit="return confirm('{{ $event->published ? '¿Pausar este evento? Los clientes ya no podrán ver ni comprar en esta galería hasta que lo reactives.' : '¿Reactivar este evento? La galería volverá a estar disponible para tus clientes.' }}')">
+    @csrf
+    <button class="btn sm {{ $event->published ? 'ghost' : '' }}">{{ $event->published ? '⏸ Pausar galería' : '▶ Activar galería' }}</button>
+  </form>
   <a href="{{ $event->galleryUrl() }}" target="_blank" class="btn ghost sm">Ver galería ↗</a>
 </div>
 

@@ -20,12 +20,13 @@
 @else
   <div class="card" style="padding:6px 12px">
     <table>
-      <thead><tr><th>Evento</th><th>Fecha</th><th>Fotos</th><th>Precio</th><th>PIN</th><th></th></tr></thead>
+      <thead><tr><th>Evento</th><th>Estado</th><th>Fecha</th><th>Fotos</th><th>Precio</th><th>PIN</th><th></th></tr></thead>
       <tbody>
       @foreach($events as $e)
         <tr>
           <td><a href="{{ route('admin.events.show',$e) }}" style="font-weight:700">{{ $e->name }}</a>
             <div class="muted" style="font-size:12px">/g/{{ $e->slug }}</div></td>
+          <td><span class="badge {{ $e->published ? 'on' : 'wait' }}">{{ $e->published ? '● Activo' : '⏸ Pausado' }}</span></td>
           <td>{{ $e->event_date? $e->event_date->format('d/m/Y') : '—' }}</td>
           <td>{{ $e->photos_count }}</td>
           <td>{{ $e->currency }} {{ number_format($e->price_unit,2) }}</td>
