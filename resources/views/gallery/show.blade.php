@@ -152,7 +152,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-a
       @csrf
       <div class="dbody">
         <div class="sumrow tot" style="margin-top:0"><span><span id="qty2">0</span> foto(s)</span><b id="total2">{{ $event->currency }} 0.00</b></div>
-        <p class="hint" style="margin-top:4px">Completa tus datos para registrar el pedido. En el siguiente paso pagarás con Yape y el fotógrafo habilitará la descarga en alta, sin marca de agua.</p>
+        <p class="hint" style="margin-top:4px">Completa tus datos para registrar el pedido. En el siguiente paso pagarás con Yape y, apenas el fotógrafo confirme, recibirás tus fotos en alta (sin marca de agua) en tu WhatsApp.</p>
         <div class="field"><label>Nombre y apellido *</label><input name="customer_name" maxlength="120" required placeholder="Tu nombre"></div>
         <div class="field"><label>WhatsApp / Celular *</label><input name="customer_contact" maxlength="60" required placeholder="Ej: 999 888 777"></div>
         <div class="field"><label>Correo (opcional)</label><input type="email" name="customer_email" maxlength="120" placeholder="tucorreo@ejemplo.com"></div>
