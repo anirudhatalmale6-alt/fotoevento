@@ -195,8 +195,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
           <li>Abre tu app <b>Yape</b> y <b>yapea al número de arriba</b> (o escanea el QR si estás en otra pantalla).</li>
           <li>Paga exactamente <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b>. Si puedes, pon tu referencia <b>{{ $order->code }}</b> en el mensaje.</li>
           <li>Sube la captura de tu Yape aquí abajo y envía. Con la captura es suficiente.</li>
-          <li>Joel confirma el pago desde su panel y se habilita tu descarga en alta, <b>sin marca de agua</b>.</li>
+          <li>Joel confirma tu pago y te enviamos tus fotos en alta, <b>sin marca de agua</b>, directo a tu <b>WhatsApp</b> ({{ $order->customer_contact }}). También quedan disponibles para descargar aquí.</li>
         </ol>
+        <div class="dltip" style="margin-top:14px">💬 Apenas Joel confirme tu Yapeo, recibirás tus fotos en tu WhatsApp <b>{{ $order->customer_contact }}</b>.</div>
       </div>
 
       @include('gallery.partials.receipt-form')

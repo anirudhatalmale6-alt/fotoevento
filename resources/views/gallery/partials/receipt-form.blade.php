@@ -6,7 +6,7 @@
     <label>Envía tu comprobante de Yape</label>
     <label class="filebox" id="fileLabel" for="receiptFile">📎 Toca aquí para subir la captura de tu Yapeo (JPG o PNG)</label>
     <input type="file" id="receiptFile" name="receipt" accept="image/jpeg,image/png" style="display:none">
-    <div class="fhint">Con la captura es suficiente 👍 Joel la revisa y se habilita tu descarga. No necesitas escribir nada más.</div>
+    <div class="fhint">Con la captura es suficiente 👍 Joel la revisa y te enviamos tus fotos a tu WhatsApp{{ !empty($order->customer_contact) ? ' ('.$order->customer_contact.')' : '' }}. No necesitas escribir nada más.</div>
   </div>
   <details class="opwrap">
     <summary>¿Prefieres escribir el código de operación? (opcional)</summary>
