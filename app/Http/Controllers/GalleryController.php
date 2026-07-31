@@ -115,8 +115,7 @@ class GalleryController extends Controller
 
         $request->session()->put('order_ok_' . $order->id, true);
 
-        // Aviso por WhatsApp al fotógrafo (después de responder, no retrasa al cliente).
-        defer(fn () => (new \App\Services\WhatsAppNotifier)->notifyNewOrder($order));
+        // NO se avisa al fotógrafo aquí: sólo cuando el cliente sube su comprobante (ya pagó).
 
         return redirect()->route('gallery.order', [
             'slug' => $event->slug, 'code' => $order->code, 't' => $order->token,
@@ -171,6 +170,10 @@ class GalleryController extends Controller
         $order->status  = 'comprobante';
         $order->paid_at = now();
         $order->save();
+
+        // Aviso por WhatsApp al fotógrafo: el cliente ya pagó y subió su comprobante.
+        // (después de responder, para no retrasar al cliente).
+        defer(fn () => (new \App\Services\WhatsAppNotifier)->notifyReceiptUploaded($order));
 
         return redirect()
             ->route('gallery.order', ['slug' => $slug, 'code' => $code, 't' => $order->token])
