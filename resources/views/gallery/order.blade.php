@@ -38,23 +38,33 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .qr{width:210px;max-width:70%;border-radius:12px;margin:12px auto 6px;display:block;background:#fff;padding:8px}
 .paytip{background:rgba(124,92,255,.12);border:1px solid rgba(124,92,255,.3);color:#c9bcff;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;margin:14px 0 2px;text-align:left}
 .numrow{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-.copybtn{background:var(--yape);color:#fff;border:none;border-radius:11px;padding:13px 18px;font-weight:800;font-size:15px;cursor:pointer;margin-top:14px;width:100%}
+.copybtn{background:var(--yape);color:#fff;border:none;border-radius:11px;padding:12px 15px;font-weight:800;font-size:14px;cursor:pointer;flex:none;white-space:nowrap}
 .copybtn:active{transform:scale(.98)}
 .qrwrap{margin-top:14px;text-align:center}
 .qrwrap>summary{color:#b7a6ff;font-size:13px;list-style:none}
 .qrwrap>summary::-webkit-details-marker{display:none}
 .payacc{color:var(--muted);font-size:13px}
 .payamt{margin-top:10px;font-size:15px}.payamt b{color:var(--gold);font-size:20px}
-/* --- Pago en 1 pantalla: número gigante, subir captura, WhatsApp --- */
-.payttl{text-align:center;font-size:22px;margin:0 0 4px}.payttl b{color:var(--gold)}
-.paybox{background:var(--panel2);border:1px solid rgba(124,92,255,.45);border-radius:16px;padding:18px 16px;margin-top:18px;text-align:center}
-.paylbl{color:var(--muted);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
-.paynum{font-size:34px;font-weight:800;letter-spacing:.04em;margin:4px 0 2px;line-height:1.15;word-break:break-all}
-@media(max-width:380px){.paynum{font-size:29px}}
-.wahint{color:var(--muted);font-size:12px;text-align:center;margin-top:8px;line-height:1.5}
-.qrlink{display:block;width:100%;background:none;border:none;color:#b7a6ff;font-size:14px;text-decoration:underline;cursor:pointer;margin-top:18px;padding:6px}
-.promise{margin-top:18px;background:rgba(0,209,178,.1);border:1px solid rgba(0,209,178,.3);color:var(--brand2);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;text-align:center}
-.promise b{color:var(--txt)}
+/* --- Pago en 1 pantalla: número y botón en la MISMA fila, sin textos de relleno --- */
+.payttl{text-align:center;font-size:22px;margin:0 0 2px}.payttl b{color:var(--gold)}
+.paybox{display:flex;align-items:center;gap:12px;text-align:left;
+  background:var(--panel2);border:1px solid rgba(124,92,255,.45);border-radius:16px;padding:12px 14px;margin-top:12px}
+.payl{flex:1;min-width:0;overflow:hidden}
+.paylbl{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+/* nowrap: el número nunca se parte en dos líneas. Si el fotógrafo guarda el número con
+   espacios o con prefijo (+51 ...) no cabe al lado del botón, así que ajustaFuente() lo
+   achica hasta que entre. El clamp es sólo el punto de partida y el respaldo sin JS. */
+.paynum{font-size:clamp(19px,6vw,26px);font-weight:800;letter-spacing:.02em;margin:1px 0;line-height:1.15;white-space:nowrap}
+.payacc{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* En pantallas angostas el botón cede ancho para que el número siga grande */
+@media(max-width:375px){.copybtn{padding:11px 12px;font-size:13px}}
+/* Teléfonos muy angostos: al lado del botón ya no queda hueco para el número,
+   así que se vuelve a apilar. La fila de una línea es para donde SÍ entra. */
+@media(max-width:340px){
+  .paybox{flex-direction:column;align-items:stretch;text-align:center}
+  .copybtn{width:100%}
+}
+.qrlink{display:block;width:100%;background:none;border:none;color:#b7a6ff;font-size:13px;cursor:pointer;margin-top:10px;padding:4px}
 /* --- Pantalla de espera: UN solo mensaje, con las fotos dentro --- */
 .revttl{text-align:center;font-size:24px;margin:0 0 6px}
 .revbox{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:20px 16px;margin-top:18px;text-align:center}
@@ -65,7 +75,13 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .picklbl{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:5px}
 .picknum{background:var(--line);color:var(--txt);border-radius:6px;min-width:18px;padding:1px 5px;font-weight:700;font-size:11px}
 .pick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
-.pickmas{color:var(--muted);font-size:12px;margin-top:12px}
+.pickmas{color:var(--muted);font-size:12px;margin-top:12px;text-align:center}
+/* Variante compacta de la pantalla de pago: el número va ENCIMA de la miniatura */
+.picks.mini{gap:8px;margin-top:12px}
+.picks.mini .pick{width:62px;position:relative}
+.picks.mini .picklbl{font-size:10px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.picks.mini img{border-radius:9px}
+.picks.mini .picknum{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.62);font-size:10px;padding:0 5px;border-radius:5px}
 .qrblock{margin-top:14px;background:#fff;border-radius:14px;padding:14px 12px}
 .qrblock .qrttl{color:#111;font-weight:700;font-size:14px;margin:0 0 4px}
 .qrblock .qr{width:240px;max-width:78%;margin:8px auto 4px;padding:6px}
@@ -88,11 +104,11 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .field{margin:12px 0}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
 .field input[type=text]{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
 /* .field label ya declara display:block, así que este selector tiene que ser más específico */
-.field label.filebox,.filebox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:132px;
-  border:2px dashed rgba(124,92,255,.55);border-radius:16px;padding:18px 14px;text-align:center;color:var(--txt);
-  font-size:16px;font-weight:700;cursor:pointer;background:var(--panel2);line-height:1.4}
-.filebox .fbico{font-size:30px;line-height:1}
-.filebox .fbsub{font-size:12px;color:var(--muted);font-weight:500}
+.field label.filebox,.filebox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:96px;
+  border:2px dashed rgba(124,92,255,.55);border-radius:16px;padding:12px 14px;text-align:center;color:var(--txt);
+  font-size:15px;font-weight:600;cursor:pointer;background:var(--panel2);line-height:1.35}
+.filebox .fbico{font-size:24px;line-height:1}
+.filebox .fbsub{font-size:11px;color:var(--muted);font-weight:500}
 .filebox.has{color:var(--brand2);border-color:var(--brand2);border-style:solid}
 .fhint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
 .opwrap{margin:10px 0 4px}
@@ -112,6 +128,16 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .dltip{margin-top:12px;background:rgba(0,209,178,.12);border:1px solid rgba(0,209,178,.35);color:var(--brand2);border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;text-align:center;font-weight:600}
 details{margin-top:12px}summary{cursor:pointer;color:var(--muted);font-size:13px}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
+/* Pantalla de pago en celulares chicos: cada píxel cuenta para que entre sin deslizar */
+@media(max-height:760px){
+  .card{padding:16px;margin-top:12px}
+  .payttl{font-size:20px}
+  .sub{margin-bottom:8px}
+  .btn{padding:12px;margin-top:10px}
+  .field{margin:10px 0}
+  .opwrap{margin:8px 0 0}
+  footer{display:none}   /* decorativo: en una pantalla corta vale más no tener que deslizar */
+}
 </style>
 </head>
 <body>
@@ -228,51 +254,51 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 
       @php $qrurl = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) : null; @endphp
 
-      {{-- 1) El número, grande, con un solo botón: copiarlo --}}
+      {{-- 1) El número y el botón de copiar, en UNA sola línea --}}
       @if(!empty($yape['number']))
         <div class="paybox">
-          <div class="paylbl">Yape al número</div>
-          <div class="paynum" id="yapenum">{{ $yape['number'] }}</div>
-          <div class="payacc">{{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>
+          <div class="payl">
+            <div class="paylbl">Yape al número</div>
+            <div class="paynum" id="yapenum">{{ $yape['number'] }}</div>
+            <div class="payacc">{{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>
+          </div>
           <button type="button" class="copybtn" onclick="copyNum(this)">📋 Copiar número</button>
         </div>
       @endif
 
-      {{-- 2) Subir la captura: la acción principal, al centro --}}
-      @include('gallery.partials.receipt-form')
-
-      {{-- 3) Alternativa: mandarlo por WhatsApp --}}
+      {{-- 2) Subir la captura + la alternativa por WhatsApp: las dos formas de mandar lo mismo --}}
       @php
         $waNum = preg_replace('/\D/', '', $yape['number'] ?? '');
         if (strlen($waNum) === 9) { $waNum = '51'.$waNum; } // Perú
         $waMsg = 'Hola Joel, te envío la captura de mi Yape del pedido '.$order->code
-               . ' ("'.$event->name.'"). Son '.$order->photo_count.' foto(s) por '
+               . ' ("'.$event->name.'"). Son '.$lasFotos.' por '
                . $event->currency.' '.number_format($order->total,2).'. Mi nombre: '.$order->customer_name.'.';
       @endphp
-      @if($waNum)
-        <a class="btn wa" id="waDirect" target="_blank" rel="noopener"
-           href="https://wa.me/{{ $waNum }}?text={{ rawurlencode($waMsg) }}"
-           data-avisar="{{ route('gallery.order.whatsapp', ['slug'=>$event->slug,'code'=>$order->code]).'?t='.$order->token }}">
-          <span style="font-size:18px">💬</span> O enviar captura por WhatsApp directo
-        </a>
-        <div class="wahint">Se abre el chat con Joel y el pedido ya escrito. Adjunta ahí la captura de tu Yape.</div>
-      @endif
+      @include('gallery.partials.receipt-form', $waNum ? [
+        'waHref'   => 'https://wa.me/'.$waNum.'?text='.rawurlencode($waMsg),
+        'waAvisar' => route('gallery.order.whatsapp', ['slug'=>$event->slug,'code'=>$order->code]).'?t='.$order->token,
+      ] : [])
 
-      {{-- 4) El QR queda a un toque, para quien paga desde otro celular --}}
+      {{-- 3) El QR queda a un toque, para quien paga desde otro celular --}}
       @if($qrurl)
         <button type="button" class="qrlink" onclick="openQR()">¿Pagas desde otro celular? Ver el QR</button>
       @endif
-
-      <div class="promise">Apenas confirmemos tu pago recibirás tus fotos sin marca de agua en tu WhatsApp <b>{{ $order->customer_contact }}</b>.</div>
     @endif
 
     {{-- Miniaturas sólo en la pantalla de pago: en revisión ya van DENTRO del mensaje --}}
     @if($porPagar)
-      <div class="thumbs">
-        @foreach($order->items->take(10) as $it)
-          @if($it->photo)<img src="{{ $it->photo->thumbUrl() }}" alt="{{ $it->code }}">@endif
+      @php $verFotos = $order->items->take(8); @endphp
+      <div class="picks mini">
+        @foreach($verFotos as $i => $it)
+          <div class="pick">
+            <div class="picklbl">{{ $it->code }}</div>
+            @if($it->photo)<img src="{{ $it->photo->thumbUrl() }}" alt="{{ $it->code }}"><span class="picknum">{{ $i+1 }}</span>@endif
+          </div>
         @endforeach
       </div>
+      @if($order->items->count() > $verFotos->count())
+        <div class="pickmas">y {{ $order->items->count() - $verFotos->count() }} más</div>
+      @endif
     @endif
 
     <a href="{{ route('gallery.show', $event->slug) }}" class="btn ghost">{{ $enRevision ? '◀ Volver a la galería' : 'Seguir viendo la galería' }}</a>
@@ -309,6 +335,20 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       }}).catch(function(){});
     }catch(e){}
   });
+})();
+/* El número tiene que caber al lado del botón sin desbordarse. Cuánto mide depende de
+   cómo lo haya guardado el fotógrafo (con espacios, con +51) y del ancho del teléfono,
+   así que se mide de verdad en vez de confiar en un tamaño fijo. */
+(function(){
+  var e=document.getElementById('yapenum'); if(!e) return;
+  var MAX=26;   // el tamaño "gigante" que pidió el cliente; sólo se baja si no entra
+  function ajustaFuente(){
+    var px=MAX; e.style.fontSize=px+'px';
+    while(e.scrollWidth>e.clientWidth && px>13){ px-=1; e.style.fontSize=px+'px'; }
+  }
+  ajustaFuente();
+  window.addEventListener('resize', ajustaFuente);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(ajustaFuente);
 })();
 function openQR(){var m=document.getElementById('qrFull');if(m)m.classList.add('open');}
 function closeQR(){var m=document.getElementById('qrFull');if(m)m.classList.remove('open');}

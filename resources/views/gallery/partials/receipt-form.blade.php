@@ -4,12 +4,21 @@
   @csrf
   <div class="field">
     <label class="filebox" id="fileLabel" for="receiptFile">
+      <span id="fileMain">Toca aquí para <b>SUBIR TU CAPTURA</b></span>
       <span class="fbico">📸</span>
-      <span id="fileMain">Toca aquí para subir tu captura</span>
-      <span class="fbsub">La captura del Yape, en JPG o PNG</span>
+      <span class="fbsub">JPG o PNG</span>
     </label>
     <input type="file" id="receiptFile" name="receipt" accept="image/jpeg,image/png" style="display:none">
   </div>
+
+  {{-- La otra forma de mandar el mismo comprobante, por eso vive dentro del formulario --}}
+  @isset($waHref)
+    <a class="btn wa" id="waDirect" target="_blank" rel="noopener" href="{{ $waHref }}"
+       @isset($waAvisar) data-avisar="{{ $waAvisar }}" @endisset>
+      <span style="font-size:18px">💬</span> O enviar captura por WhatsApp directo
+    </a>
+  @endisset
+
   <details class="opwrap">
     <summary>¿Prefieres escribir el código de operación? (opcional)</summary>
     <input type="text" name="op_code" maxlength="40" placeholder="Ej: 01234567" style="margin-top:8px">
