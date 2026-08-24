@@ -55,6 +55,17 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .qrlink{display:block;width:100%;background:none;border:none;color:#b7a6ff;font-size:14px;text-decoration:underline;cursor:pointer;margin-top:18px;padding:6px}
 .promise{margin-top:18px;background:rgba(0,209,178,.1);border:1px solid rgba(0,209,178,.3);color:var(--brand2);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;text-align:center}
 .promise b{color:var(--txt)}
+/* --- Pantalla de espera: UN solo mensaje, con las fotos dentro --- */
+.revttl{text-align:center;font-size:24px;margin:0 0 6px}
+.revbox{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:20px 16px;margin-top:18px;text-align:center}
+.revttl2{font-size:18px;font-weight:800;margin-bottom:6px}
+.revtxt{color:var(--muted);font-size:15px;line-height:1.6;margin:0}.revtxt b{color:var(--txt)}
+.picks{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:16px}
+.pick{width:104px}
+.picklbl{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:5px}
+.picknum{background:var(--line);color:var(--txt);border-radius:6px;min-width:18px;padding:1px 5px;font-weight:700;font-size:11px}
+.pick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+.pickmas{color:var(--muted);font-size:12px;margin-top:12px}
 .qrblock{margin-top:14px;background:#fff;border-radius:14px;padding:14px 12px}
 .qrblock .qrttl{color:#111;font-weight:700;font-size:14px;margin:0 0 4px}
 .qrblock .qr{width:240px;max-width:78%;margin:8px auto 4px;padding:6px}
@@ -110,12 +121,24 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 
 <div class="wrap">
   <div class="card">
-    @php $st = $order->status; $porPagar = in_array($st, ['pendiente','rechazado'], true); @endphp
+    @php
+      $st         = $order->status;
+      $porPagar   = in_array($st, ['pendiente','rechazado'], true);
+      $enRevision = $st === 'comprobante';
+      $nFotos     = (int) $order->photo_count;
+      $lasFotos   = $nFotos === 1 ? '1 foto' : $nFotos.' fotos';
+    @endphp
 
     @if($porPagar)
       {{-- Pantalla de PAGO: una sola cosa que hacer, sin adornos --}}
       <h2 class="payttl">Pagar pedido <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></h2>
-      <div class="sub">{{ $order->photo_count }} foto(s) · Referencia {{ $order->code }}</div>
+      <div class="sub">{{ $lasFotos }} · Referencia {{ $order->code }}</div>
+      @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
+    @elseif($enRevision)
+      {{-- Pantalla de ESPERA: el mensaje va UNA sola vez, no en dos cajas --}}
+      <h2 class="revttl">⏳ ¡Pago en revisión!</h2>
+      <div class="sub">Referencia <b style="color:var(--txt)">{{ $order->code }}</b> ·
+        {{ $lasFotos }} · <b style="color:var(--gold)">{{ $event->currency }} {{ number_format($order->total,2) }}</b></div>
       @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
     @else
       <div class="ring {{ $st==='aprobado'?'ok':($st==='comprobante'?'wait':'ok') }}">
@@ -158,26 +181,44 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       <div class="note">Descarga cada foto con el botón correspondiente. El archivo es el original en alta, sin marca de agua. Guarda este enlace para volver a descargar cuando quieras.</div>
 
     {{-- ====== ESTADO: COMPROBANTE (en revisión) ====== --}}
-    @elseif($st==='comprobante')
-      <div class="yapebox">
-        <div class="ring wait" style="margin-top:4px">⏳</div>
-        <div style="font-weight:700">Tu pago está en revisión</div>
-        <p style="color:var(--muted);font-size:14px;margin:8px 0 0;line-height:1.6">¡Gracias! Recibimos tu comprobante. En cuanto confirmemos tu Yapeo, te enviaremos tus fotos en alta definición directamente a tu WhatsApp. Ya puedes cerrar esta pantalla con tranquilidad.</p>
-        <div class="eta">⏳ Tiempo promedio de validación: 5 a 15 minutos.</div>
-        @if($order->op_code)<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Código de operación: <b style="color:var(--txt)">{{ $order->op_code }}</b></p>@endif
-        @php
-          $waNum = preg_replace('/\D/', '', $yape['number'] ?? '');
-          if (strlen($waNum) === 9) { $waNum = '51'.$waNum; } // Perú
-          $waMsg = 'Hola, ya subí mi comprobante '.$order->code.' para las fotos de "'.$event->name.'". Mi nombre: '.$order->customer_name.'.';
-        @endphp
-        @if($waNum)
-          <a class="btn wa" href="https://wa.me/{{ $waNum }}?text={{ rawurlencode($waMsg) }}" target="_blank">💬 Consultar por WhatsApp</a>
+    @elseif($enRevision)
+      {{-- Un solo mensaje, con las fotos dentro. Antes se repetía en la caja verde y aquí. --}}
+      <div class="revbox">
+        <div class="revttl2">¡Recibimos tu comprobante!</div>
+        <p class="revtxt">Apenas validemos tu Yape, te enviaremos tus {{ $lasFotos }} sin marca de agua
+          a tu WhatsApp <b>{{ $order->customer_contact }}</b> (5-15 min).</p>
+
+        @php $verFotos = $order->items->take(6); @endphp
+        <div class="picks">
+          @foreach($verFotos as $i => $it)
+            <div class="pick">
+              <div class="picklbl"><span class="picknum">{{ $i+1 }}</span> {{ $it->code }}</div>
+              @if($it->photo)<img src="{{ $it->photo->thumbUrl() }}" alt="{{ $it->code }}">@endif
+            </div>
+          @endforeach
+        </div>
+        @if($order->items->count() > $verFotos->count())
+          <div class="pickmas">y {{ $order->items->count() - $verFotos->count() }} más</div>
         @endif
+
+        @if($order->op_code)<div class="pickmas">Código de operación: <b style="color:var(--txt)">{{ $order->op_code }}</b></div>@endif
       </div>
+
       <details>
         <summary>¿Te equivocaste de comprobante? Enviar otro</summary>
         @include('gallery.partials.receipt-form')
       </details>
+
+      @php
+        $waNum = preg_replace('/\D/', '', $yape['number'] ?? '');
+        if (strlen($waNum) === 9) { $waNum = '51'.$waNum; } // Perú
+        $waMsg = 'Hola, ya subí mi comprobante '.$order->code.' para las fotos de "'.$event->name.'". Mi nombre: '.$order->customer_name.'.';
+      @endphp
+      @if($waNum)
+        <a class="btn wa" href="https://wa.me/{{ $waNum }}?text={{ rawurlencode($waMsg) }}" target="_blank" rel="noopener">
+          <span style="font-size:18px">💬</span> WhatsApp de Soporte
+        </a>
+      @endif
 
     {{-- ====== ESTADO: PENDIENTE / RECHAZADO -> pagar ====== --}}
     @else
@@ -225,8 +266,8 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       <div class="promise">Apenas confirmemos tu pago recibirás tus fotos sin marca de agua en tu WhatsApp <b>{{ $order->customer_contact }}</b>.</div>
     @endif
 
-    {{-- fotos del pedido (miniaturas) para estados no-aprobado --}}
-    @if($st!=='aprobado')
+    {{-- Miniaturas sólo en la pantalla de pago: en revisión ya van DENTRO del mensaje --}}
+    @if($porPagar)
       <div class="thumbs">
         @foreach($order->items->take(10) as $it)
           @if($it->photo)<img src="{{ $it->photo->thumbUrl() }}" alt="{{ $it->code }}">@endif
@@ -234,7 +275,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       </div>
     @endif
 
-    <a href="{{ route('gallery.show', $event->slug) }}" class="btn ghost">Seguir viendo la galería</a>
+    <a href="{{ route('gallery.show', $event->slug) }}" class="btn ghost">{{ $enRevision ? '◀ Volver a la galería' : 'Seguir viendo la galería' }}</a>
   </div>
 </div>
 @php $qrurlFull = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) : null; @endphp
