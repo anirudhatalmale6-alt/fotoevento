@@ -75,6 +75,15 @@ class Order extends Model
         };
     }
 
+    /**
+     * El cliente pulsó "enviar captura por WhatsApp": el comprobante no llega al panel,
+     * llega al celular del fotógrafo. El pedido sigue pendiente hasta que él lo apruebe.
+     */
+    public function avisadoPorWhatsApp(): bool
+    {
+        return str_contains((string) $this->note, \App\Http\Controllers\GalleryController::NOTA_WHATSAPP);
+    }
+
     public function isApproved(): bool
     {
         return $this->status === 'aprobado';

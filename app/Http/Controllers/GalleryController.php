@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
+    /** Marca que el cliente dijo que manda el comprobante por WhatsApp (se guarda en orders.note). */
+    public const NOTA_WHATSAPP = 'El cliente envía su comprobante por WhatsApp';
+
     /**
      * Busca un evento disponible por slug. Si está pausado (published=false)
      * muestra una página amable "no disponible" en lugar de un error 404.
@@ -178,6 +181,37 @@ class GalleryController extends Controller
         return redirect()
             ->route('gallery.order', ['slug' => $slug, 'code' => $code, 't' => $order->token])
             ->with('flash', 'comprobante');
+    }
+
+    /**
+     * El cliente eligió mandar su comprobante por WhatsApp en vez de subirlo aquí.
+     *
+     * Sin esto el pedido se quedaría en "pendiente" y el fotógrafo no recibiría ningún
+     * aviso: el comprobante llega a su WhatsApp personal y el panel nunca se entera.
+     * No marcamos el pedido como pagado (no hay prueba todavía), sólo lo señalamos.
+     */
+    public function sendingByWhatsApp(Request $request, string $slug, string $code)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        $order = Order::where('event_id', $event->id)->where('code', $code)->firstOrFail();
+
+        $this->authorizeOrder($request, $order);
+
+        // Si ya subió comprobante o ya está aprobado, no hay nada que anunciar.
+        if (! in_array($order->status, ['pendiente', 'rechazado'], true)) {
+            return response()->json(['ok' => true]);
+        }
+
+        // Una sola vez por pedido: volver a tocar el botón no repite el aviso.
+        if (! str_contains((string) $order->note, self::NOTA_WHATSAPP)) {
+            $order->note = trim(($order->note ? $order->note . "\n" : '')
+                . self::NOTA_WHATSAPP . ' — ' . now()->format('d/m/Y H:i'));
+            $order->save();
+
+            defer(fn () => (new \App\Services\WhatsAppNotifier)->notifySendingByWhatsApp($order));
+        }
+
+        return response()->json(['ok' => true]);
     }
 
     /** Descarga segura del ORIGINAL (sin marca de agua). Sólo si el pedido está aprobado. */

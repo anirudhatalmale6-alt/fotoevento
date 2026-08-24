@@ -7,7 +7,7 @@
 <title>{{ $event->name }} · Joel Garate Fotografía</title>
 @include('gallery.partials.og', ['event' => $event])
 <style>
-:root{--bg:#0e1015;--panel:#161a22;--panel2:#1d222c;--line:#2a3140;--txt:#eef1f6;--muted:#9aa4b5;--brand:#7c5cff;--brand2:#00d1b2;--gold:#e8c17a}
+:root{--bg:#0e1015;--panel:#161a22;--panel2:#1d222c;--line:#2a3140;--txt:#eef1f6;--muted:#9aa4b5;--brand:#7c5cff;--brand2:#00d1b2;--gold:#e8c17a;--yape:#742284}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
 header.top{position:sticky;top:0;z-index:40;background:rgba(14,16,21,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
@@ -19,7 +19,7 @@ header.top{position:sticky;top:0;z-index:40;background:rgba(14,16,21,.86);backdr
 .pricepills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .pill{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px}.pill b{color:var(--gold)}
 .note{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:13px}
-.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:22px 0 110px}
+.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:22px 0 10px}
 @media(max-width:900px){.gallery{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){.gallery{grid-template-columns:repeat(2,1fr)}}
 .cell{position:relative;border-radius:12px;overflow:hidden;background:#1d222c;aspect-ratio:3/2;cursor:pointer;border:2px solid transparent}
@@ -45,34 +45,28 @@ header.top{position:sticky;top:0;z-index:40;background:rgba(14,16,21,.86);backdr
 .btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
 .btn.block{width:100%}
 .btn:disabled{opacity:.6;cursor:default}
-/* Barra flotante del carrito */
-.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(22,26,34,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
-.cartbar .wrap{display:flex;align-items:center;gap:12px;height:64px}
-.cartbar .info{flex:1}.cartbar .info b{color:var(--gold)}
-.cartbar .sub{font-size:12px;color:var(--brand2)}
-/* Drawer */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:none}.ov.open{display:block}
-.drawer{position:fixed;top:0;right:0;height:100%;width:420px;max-width:92vw;background:var(--panel);border-left:1px solid var(--line);z-index:65;transform:translateX(100%);transition:transform .28s;display:flex;flex-direction:column}
-.drawer.open{transform:translateX(0)}
-.drawer h3{margin:0;font-size:17px}
-.dhead{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-.dhead .x{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
-.step{display:none;flex:1;flex-direction:column;overflow:hidden}.step.on{display:flex}
-.dbody{flex:1;overflow:auto;padding:14px 18px}
-.dfoot{border-top:1px solid var(--line);padding:14px 18px}
-.li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-.li img{width:52px;height:38px;object-fit:cover;border-radius:7px}
-.li .g{flex:1;font-size:13px}
-.li .rm{background:none;border:none;color:#e5484d;font-size:12px;cursor:pointer;font-weight:700}
-.sumrow{display:flex;justify-content:space-between;font-size:14px;margin:6px 0}
-.sumrow.tot{font-size:18px;font-weight:800;margin-top:10px}.sumrow.tot b{color:var(--gold)}
-.sumrow.disc{color:var(--brand2)}
-.pkgs{margin:0 0 8px;padding-bottom:8px;border-bottom:1px dashed var(--line)}.pkg{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0}
-.field{margin:10px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-.field input{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
-.field input:focus{outline:none;border-color:var(--brand)}
-.hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
-footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-align:center;padding:22px 0 90px}
+/* Barra flotante = pago en 1 paso (nombre + WhatsApp + pagar) */
+.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(22,26,34,.97);border-top:1px solid var(--line);backdrop-filter:blur(10px);
+  box-shadow:0 -10px 30px rgba(0,0,0,.45);transition:transform .18s ease-out}
+.cartbar .wrap{padding-top:10px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.cbtop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.cbcount{font-size:13px;color:var(--muted)}.cbcount b{color:var(--txt)}
+.cbsave{font-size:12px;color:var(--brand2);font-weight:700;text-align:right}
+.cbfields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:340px){.cbfields{grid-template-columns:1fr}}
+.cbf{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:0 11px}
+.cbf .ico{font-size:14px;opacity:.7;flex:none}
+.cbf input{flex:1;min-width:0;width:100%;background:none;border:none;color:var(--txt);font-size:15px;padding:12px 0}
+.cbf input:focus{outline:none}
+.cbf:focus-within{border-color:var(--brand)}
+.cbf.bad{border-color:#e5484d}
+.cberr{display:none;color:#ff8a8d;font-size:12px;margin-top:7px}
+.cberr.on{display:block}
+.paybtn{width:100%;margin-top:10px;background:var(--yape);color:#fff;border:none;border-radius:12px;padding:15px;font-weight:800;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.paybtn:active{transform:scale(.99)}
+.paybtn:disabled{opacity:.7;cursor:default}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-align:center;padding:22px 0 26px}
 </style>
 </head>
 <body>
@@ -92,7 +86,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-a
       <div class="pill">{{ $pk->label ?: 'Paquete '.$pk->qty.' fotos' }} <b>{{ $event->currency }} {{ number_format($pk->price,2) }}</b></div>
     @endforeach
   </div>
-  <div class="note">Toca el círculo de cada foto para agregarla a tu selección. El sistema calcula automáticamente el mejor precio según los paquetes. Cuando termines, presiona “Continuar con el pedido”.</div>
+  <div class="note">Toca el círculo de cada foto para elegirla. El precio se calcula solo, siempre con el mejor paquete. Cuando termines, escribe tu nombre y tu WhatsApp abajo y pasa a pagar con Yape.</div>
 </div>
 
 <div class="wrap">
@@ -117,54 +111,26 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-a
   </div>
 </div>
 
-<!-- Barra flotante -->
-<div class="cartbar" id="cartbar" style="display:none">
+<!-- Barra flotante: seleccionar + datos + pagar, todo en la misma pantalla -->
+<form class="cartbar" id="cartbar" style="display:none"
+      method="post" action="{{ route('gallery.order.store', $event->slug) }}">
+  @csrf
   <div class="wrap">
-    <div class="info"><span id="count">0</span> foto(s) · <b id="barTotal">{{ $event->currency }} 0.00</b>
-      <div class="sub" id="barSub"></div>
+    <div class="cbtop">
+      <div class="cbcount"><b id="count">0</b> foto(s) seleccionada(s)</div>
+      <div class="cbsave" id="barSub"></div>
     </div>
-    <button class="btn" id="openCart">Ver mi selección</button>
-  </div>
-</div>
-
-<!-- Drawer -->
-<div class="ov" id="ov"></div>
-<aside class="drawer" id="drawer">
-  <div class="dhead"><h3 id="drawerTitle">Tu selección</h3><button class="x" id="closeCart">×</button></div>
-
-  <!-- Paso 1: items -->
-  <div class="step on" id="stepItems">
-    <div class="dbody">
-      <div class="pkgs" id="pkgs"></div>
-      <div id="items"></div>
+    <div class="cbfields">
+      <div class="cbf" id="wName"><span class="ico">👤</span>
+        <input name="customer_name" id="fName" maxlength="120" placeholder="Tu nombre" autocomplete="name" enterkeyhint="next"></div>
+      <div class="cbf" id="wPhone"><span class="ico">📱</span>
+        <input name="customer_contact" id="fPhone" maxlength="60" placeholder="Tu WhatsApp" inputmode="tel" autocomplete="tel" enterkeyhint="done"></div>
     </div>
-    <div class="dfoot">
-      <div class="sumrow"><span>Subtotal (<span id="qty">0</span> fotos)</span><span id="subtotal">{{ $event->currency }} 0.00</span></div>
-      <div class="sumrow disc" id="discRow" style="display:none"><span id="discLabel">Descuento</span><span id="discVal"></span></div>
-      <div class="sumrow tot"><span>Total</span><b id="total">{{ $event->currency }} 0.00</b></div>
-      <button class="btn block" id="toCheckout" style="margin-top:12px">Continuar con el pedido</button>
-    </div>
+    <div class="cberr" id="cbErr"></div>
+    <button class="paybtn" id="payBtn" type="submit"><span id="barTotal">Pagar con Yape</span></button>
+    <div id="hiddenIds"></div>
   </div>
-
-  <!-- Paso 2: datos del cliente -->
-  <div class="step" id="stepForm">
-    <form method="post" action="{{ route('gallery.order.store', $event->slug) }}" id="orderForm" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
-      @csrf
-      <div class="dbody">
-        <div class="sumrow tot" style="margin-top:0"><span><span id="qty2">0</span> foto(s)</span><b id="total2">{{ $event->currency }} 0.00</b></div>
-        <p class="hint" style="margin-top:4px">Completa tus datos para registrar el pedido. En el siguiente paso pagarás con Yape y, apenas el fotógrafo confirme, recibirás tus fotos en alta (sin marca de agua) en tu WhatsApp.</p>
-        <div class="field"><label>Nombre y apellido *</label><input name="customer_name" maxlength="120" required placeholder="Tu nombre"></div>
-        <div class="field"><label>WhatsApp / Celular *</label><input name="customer_contact" maxlength="60" required placeholder="Ej: 999 888 777"></div>
-        <div class="field"><label>Correo (opcional)</label><input type="email" name="customer_email" maxlength="120" placeholder="tucorreo@ejemplo.com"></div>
-        <div id="hiddenIds"></div>
-      </div>
-      <div class="dfoot">
-        <button type="button" class="btn ghost block" id="backToItems" style="margin-bottom:8px">← Volver a mi selección</button>
-        <button type="submit" class="btn block" id="confirmOrder">Confirmar pedido</button>
-      </div>
-    </form>
-  </div>
-</aside>
+</form>
 
 <script id="eventData" type="application/json">
 {!! json_encode([
@@ -237,63 +203,82 @@ function toggle(id){
   syncCells(); renderCart(); updateLbBtn();
 }
 
-/* ---- Carrito ---- */
+/* ---- Barra de pago (reemplaza al carrito y a la ventana de datos) ---- */
+const bar = $('#cartbar');
+
 function renderCart(){
-  const ids=[...selected]; const n=ids.length;
-  $('#count').textContent=n; $('#qty').textContent=n; $('#qty2').textContent=n;
-  $('#cartbar').style.display = n>0 ? 'block' : 'none';
+  const n = selected.size;
+  $('#count').textContent = n;
+  bar.style.display = n>0 ? 'block' : 'none';
 
-  $('#pkgs').innerHTML = EVENT.packages.map(p=>{
-    const lbl=p.label || ('Paquete '+p.qty+' fotos');
-    return `<div class="pkg"><span>${lbl} · ${p.qty} fotos</span><span>${money(p.price)}</span></div>`;
-  }).join('');
-
-  if(n===0){
-    $('#items').innerHTML=`<div class="empty" style="padding:30px 0">Aún no has seleccionado fotos.<br>Toca el círculo de una foto para agregarla.</div>`;
-  } else {
-    $('#items').innerHTML = ids.map(id=>{
-      const p=EVENT.photos.find(x=>x.id===id);
-      return `<div class="li"><img src="${p.thumb}"><div class="g">${p.code}<br><small style="color:var(--muted)">${money(EVENT.unit)}</small></div><button class="rm" data-id="${id}">Quitar</button></div>`;
-    }).join('');
-    document.querySelectorAll('.rm').forEach(b=>b.addEventListener('click',()=>toggle(b.dataset.id)));
-  }
-
-  const q=quote(n);
-  $('#subtotal').textContent=money(q.sub);
-  $('#total').textContent=money(q.total);
-  $('#total2').textContent=money(q.total);
-  $('#barTotal').textContent=money(q.total);
-  $('#barSub').textContent = q.discount>0.001 ? ('Ahorras '+money(q.discount)) : '';
-  if(q.discount>0.001){
-    $('#discRow').style.display='flex';
-    $('#discLabel').textContent = q.label || 'Descuento';
-    $('#discVal').textContent = '- '+money(q.discount);
-  } else $('#discRow').style.display='none';
+  const q = quote(n);
+  $('#barTotal').textContent = 'Pagar ' + money(q.total) + ' con Yape';
+  $('#barSub').textContent = q.discount>0.001
+    ? ('Ahorras '+money(q.discount)+(q.label? ' · '+q.label : ''))
+    : '';
+  fitBar();
 }
 
-/* ---- Drawer ---- */
-function openCart(){ showStep('items'); $('#drawer').classList.add('open'); $('#ov').classList.add('open'); }
-function closeCart(){ $('#drawer').classList.remove('open'); $('#ov').classList.remove('open'); }
-function showStep(which){
-  $('#stepItems').classList.toggle('on', which==='items');
-  $('#stepForm').classList.toggle('on', which==='form');
-  $('#drawerTitle').textContent = which==='form' ? 'Tus datos' : 'Tu selección';
+/* El alto de la barra cambia (1 o 2 filas de campos, con o sin error):
+   el hueco al final de la galería se recalcula, nunca se fija a ojo. */
+function fitBar(){
+  const h = bar.style.display==='none' ? 0 : bar.offsetHeight;
+  document.body.style.paddingBottom = h ? (h+8)+'px' : '';
 }
-$('#openCart').addEventListener('click', openCart);
-$('#closeCart').addEventListener('click', closeCart);
-$('#ov').addEventListener('click', closeCart);
-$('#toCheckout').addEventListener('click', ()=>{ if(selected.size===0) return; showStep('form'); });
-$('#backToItems').addEventListener('click', ()=> showStep('items'));
+window.addEventListener('resize', fitBar);
 
-/* ---- Enviar pedido: inyecta los IDs seleccionados en el form ---- */
-$('#orderForm').addEventListener('submit', e=>{
+/* Teclado de Android/iOS: el teclado NO empuja a los elementos fijos, los tapa.
+   visualViewport dice cuánto ocupa, y subimos la barra justo eso. */
+const vv = window.visualViewport;
+function liftBar(){
+  if(!vv) return;
+  const tapado = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+  bar.style.transform = tapado > 60 ? 'translateY(-'+tapado+'px)' : '';
+}
+if(vv){ vv.addEventListener('resize', liftBar); vv.addEventListener('scroll', liftBar); }
+
+/* ---- Recordar los datos para la próxima compra ---- */
+const KEY_N='fe_nombre', KEY_T='fe_whatsapp';
+try{
+  const n=localStorage.getItem(KEY_N), t=localStorage.getItem(KEY_T);
+  if(n) $('#fName').value=n;
+  if(t) $('#fPhone').value=t;
+}catch(e){}
+
+/* ---- Validación en el sitio, sin sacar al cliente de la galería ---- */
+function soloDigitos(s){ return (s||'').replace(/\D/g,''); }
+function showErr(msg, campo){
+  const e=$('#cbErr'); e.textContent=msg; e.classList.add('on');
+  $('#wName').classList.toggle('bad', campo==='nombre');
+  $('#wPhone').classList.toggle('bad', campo==='whatsapp');
+  fitBar();
+  if(campo==='nombre') $('#fName').focus(); else $('#fPhone').focus();
+}
+function clearErr(){
+  $('#cbErr').classList.remove('on');
+  $('#wName').classList.remove('bad'); $('#wPhone').classList.remove('bad');
+  fitBar();
+}
+$('#fName').addEventListener('input', clearErr);
+$('#fPhone').addEventListener('input', clearErr);
+$('#fName').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#fPhone').focus(); } });
+
+bar.addEventListener('submit', e=>{
+  const nombre = $('#fName').value.trim();
+  const tel    = soloDigitos($('#fPhone').value);
+
   if(selected.size===0){ e.preventDefault(); return; }
+  if(nombre.length < 2){ e.preventDefault(); showErr('Escribe tu nombre para poder enviarte las fotos.','nombre'); return; }
+  if(tel.length < 9){ e.preventDefault(); showErr('Tu WhatsApp debe tener 9 dígitos. Ahí te enviamos las fotos.','whatsapp'); return; }
+
+  try{ localStorage.setItem(KEY_N, nombre); localStorage.setItem(KEY_T, $('#fPhone').value.trim()); }catch(err){}
+
   const box=$('#hiddenIds'); box.innerHTML='';
   [...selected].forEach(id=>{
     const inp=document.createElement('input');
     inp.type='hidden'; inp.name='photo_ids[]'; inp.value=id; box.appendChild(inp);
   });
-  $('#confirmOrder').disabled=true; $('#confirmOrder').textContent='Enviando...';
+  $('#payBtn').disabled=true; $('#barTotal').textContent='Un momento...';
 });
 
 /* ---- Analítica: registra la previsualización de una foto (sin datos personales) ---- */

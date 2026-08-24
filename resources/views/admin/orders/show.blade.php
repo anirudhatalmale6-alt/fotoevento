@@ -60,11 +60,16 @@
 
   @if($order->status==='aprobado')
     <div class="flash" style="margin:0 0 12px">Pago aprobado el {{ $order->approved_at?->format('d/m/Y H:i') }}. El cliente ya puede descargar sus fotos en alta.</div>
+  @elseif($order->avisadoPorWhatsApp() && ! $order->hasReceipt())
+    <div class="flash" style="margin:0 0 12px;background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.4);color:#25d366">
+      💬 Este cliente eligió mandarte la captura por WhatsApp, así que no la vas a ver aquí.
+      Búscala en tu chat con {{ $order->customer_contact }} y, si el Yape está bien, aprueba el pedido con el botón de abajo.
+    </div>
   @elseif($order->status==='pendiente')
     <p class="muted" style="font-size:14px;margin:0">El cliente aún no ha enviado su comprobante. Cuando pague con Yape y suba la captura, aparecerá aquí para que la revises y apruebes.</p>
   @endif
 
-  @if($order->hasReceipt() || $order->op_code)
+  @if($order->hasReceipt() || $order->op_code || $order->avisadoPorWhatsApp())
     <div class="row" style="align-items:flex-start">
       @if($order->hasReceipt())
         <div class="col" style="min-width:200px;max-width:260px">

@@ -37,7 +37,11 @@
           <td class="muted">{{ $o->event?->name }}</td>
           <td>{{ $o->photo_count }}</td>
           <td style="font-weight:700">{{ $o->event?->currency }} {{ number_format($o->total,2) }}</td>
-          <td><span class="badge {{ $o->statusBadge() }}">{{ $o->statusLabel() }}</span></td>
+          <td><span class="badge {{ $o->statusBadge() }}">{{ $o->statusLabel() }}</span>
+            @if($o->avisadoPorWhatsApp())
+              <div style="font-size:12px;color:#25d366;font-weight:700;margin-top:4px">💬 Te manda la captura por WhatsApp</div>
+            @endif
+          </td>
           <td style="text-align:right;white-space:nowrap">
             <a href="{{ route('admin.orders.show',$o) }}" class="btn ghost sm">Ver</a>
             <form method="post" action="{{ route('admin.orders.destroy',$o) }}" style="display:inline"

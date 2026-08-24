@@ -64,4 +64,5 @@ Route::post('/g/{slug}/track', [GalleryController::class, 'track'])->name('galle
 Route::post('/g/{slug}/pedido', [GalleryController::class, 'storeOrder'])->name('gallery.order.store');
 Route::get('/g/{slug}/pedido/{code}', [GalleryController::class, 'order'])->name('gallery.order');
 Route::post('/g/{slug}/pedido/{code}/comprobante', [GalleryController::class, 'uploadReceipt'])->name('gallery.order.receipt');
+Route::post('/g/{slug}/pedido/{code}/por-whatsapp', [GalleryController::class, 'sendingByWhatsApp'])->name('gallery.order.whatsapp');
 Route::get('/g/{slug}/pedido/{code}/descargar/{item}', [GalleryController::class, 'download'])->name('gallery.download');

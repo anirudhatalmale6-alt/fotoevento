@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Pedido {{ $order->code }} · {{ $event->name }}</title>
 <style>
 :root{--bg:#0e1015;--panel:#161a22;--panel2:#1d222c;--line:#2a3140;--txt:#eef1f6;--muted:#9aa4b5;--brand:#7c5cff;--brand2:#00d1b2;--gold:#e8c17a;--danger:#e5484d;--yape:#742284}
@@ -37,14 +38,23 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 .qr{width:210px;max-width:70%;border-radius:12px;margin:12px auto 6px;display:block;background:#fff;padding:8px}
 .paytip{background:rgba(124,92,255,.12);border:1px solid rgba(124,92,255,.3);color:#c9bcff;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;margin:14px 0 2px;text-align:left}
 .numrow{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-.copybtn{background:var(--yape);color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;font-size:13px;cursor:pointer}
-.copybtn:active{transform:scale(.97)}
+.copybtn{background:var(--yape);color:#fff;border:none;border-radius:11px;padding:13px 18px;font-weight:800;font-size:15px;cursor:pointer;margin-top:14px;width:100%}
+.copybtn:active{transform:scale(.98)}
 .qrwrap{margin-top:14px;text-align:center}
 .qrwrap>summary{color:#b7a6ff;font-size:13px;list-style:none}
 .qrwrap>summary::-webkit-details-marker{display:none}
-.paynum{font-size:26px;font-weight:800;letter-spacing:.03em;margin:0}
 .payacc{color:var(--muted);font-size:13px}
 .payamt{margin-top:10px;font-size:15px}.payamt b{color:var(--gold);font-size:20px}
+/* --- Pago en 1 pantalla: número gigante, subir captura, WhatsApp --- */
+.payttl{text-align:center;font-size:22px;margin:0 0 4px}.payttl b{color:var(--gold)}
+.paybox{background:var(--panel2);border:1px solid rgba(124,92,255,.45);border-radius:16px;padding:18px 16px;margin-top:18px;text-align:center}
+.paylbl{color:var(--muted);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.paynum{font-size:34px;font-weight:800;letter-spacing:.04em;margin:4px 0 2px;line-height:1.15;word-break:break-all}
+@media(max-width:380px){.paynum{font-size:29px}}
+.wahint{color:var(--muted);font-size:12px;text-align:center;margin-top:8px;line-height:1.5}
+.qrlink{display:block;width:100%;background:none;border:none;color:#b7a6ff;font-size:14px;text-decoration:underline;cursor:pointer;margin-top:18px;padding:6px}
+.promise{margin-top:18px;background:rgba(0,209,178,.1);border:1px solid rgba(0,209,178,.3);color:var(--brand2);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;text-align:center}
+.promise b{color:var(--txt)}
 .qrblock{margin-top:14px;background:#fff;border-radius:14px;padding:14px 12px}
 .qrblock .qrttl{color:#111;font-weight:700;font-size:14px;margin:0 0 4px}
 .qrblock .qr{width:240px;max-width:78%;margin:8px auto 4px;padding:6px}
@@ -66,8 +76,13 @@ h2{text-align:center;margin:0 0 4px;font-size:22px}
 /* form */
 .field{margin:12px 0}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
 .field input[type=text]{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
-.filebox{border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;background:var(--panel2)}
-.filebox.has{color:var(--brand2);border-color:var(--brand2)}
+/* .field label ya declara display:block, así que este selector tiene que ser más específico */
+.field label.filebox,.filebox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:132px;
+  border:2px dashed rgba(124,92,255,.55);border-radius:16px;padding:18px 14px;text-align:center;color:var(--txt);
+  font-size:16px;font-weight:700;cursor:pointer;background:var(--panel2);line-height:1.4}
+.filebox .fbico{font-size:30px;line-height:1}
+.filebox .fbsub{font-size:12px;color:var(--muted);font-weight:500}
+.filebox.has{color:var(--brand2);border-color:var(--brand2);border-style:solid}
 .fhint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
 .opwrap{margin:10px 0 4px}
 .opwrap>summary{color:var(--muted);font-size:12px;cursor:pointer;list-style:none}
@@ -95,32 +110,38 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 
 <div class="wrap">
   <div class="card">
-    @php $st = $order->status; @endphp
-    <div class="ring {{ $st==='aprobado'?'ok':($st==='rechazado'?'bad':($st==='comprobante'?'wait':'ok')) }}">
-      {{ $st==='aprobado'?'✓':($st==='rechazado'?'!':($st==='comprobante'?'⏳':'✓')) }}
-    </div>
-    <h2>
-      @if($st==='aprobado') ¡Pago aprobado!
-      @elseif($st==='comprobante') Comprobante recibido
-      @elseif($st==='rechazado') Revisa tu comprobante
-      @else ¡Pedido registrado!
+    @php $st = $order->status; $porPagar = in_array($st, ['pendiente','rechazado'], true); @endphp
+
+    @if($porPagar)
+      {{-- Pantalla de PAGO: una sola cosa que hacer, sin adornos --}}
+      <h2 class="payttl">Pagar pedido <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></h2>
+      <div class="sub">{{ $order->photo_count }} foto(s) · Referencia {{ $order->code }}</div>
+      @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
+    @else
+      <div class="ring {{ $st==='aprobado'?'ok':($st==='comprobante'?'wait':'ok') }}">
+        {{ $st==='aprobado'?'✓':($st==='comprobante'?'⏳':'✓') }}
+      </div>
+      <h2>
+        @if($st==='aprobado') ¡Pago aprobado!
+        @else Comprobante recibido
+        @endif
+      </h2>
+      <div class="sub">Referencia <b style="color:var(--txt)">{{ $order->code }}</b> ·
+        <span class="badge {{ $st==='aprobado'?'ok':'rev' }}">{{ $order->statusLabel() }}</span>
+      </div>
+
+      @if(session('flash')==='comprobante')<div class="flash">¡Gracias! Recibimos tu comprobante. En cuanto confirmemos tu Yapeo te enviaremos tus fotos a tu WhatsApp. 💬</div>@endif
+      @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
+
+      {{-- Resumen del pedido --}}
+      <div class="kv"><span>Evento</span><span>{{ $event->name }}</span></div>
+      <div class="kv"><span>Nombre</span><span>{{ $order->customer_name }}</span></div>
+      <div class="kv"><span>Fotos</span><span>{{ $order->photo_count }}</span></div>
+      @if($order->subtotal - $order->total > 0.001)
+        <div class="kv" style="color:var(--brand2)"><span>{{ $order->applied_label ?: 'Descuento' }}</span><span>- {{ $event->currency }} {{ number_format($order->subtotal - $order->total,2) }}</span></div>
       @endif
-    </h2>
-    <div class="sub">Referencia <b style="color:var(--txt)">{{ $order->code }}</b> ·
-      <span class="badge {{ $st==='aprobado'?'ok':($st==='rechazado'?'bad':($st==='comprobante'?'rev':'pend')) }}">{{ $order->statusLabel() }}</span>
-    </div>
-
-    @if(session('flash')==='comprobante')<div class="flash">¡Gracias! Recibimos tu comprobante. En cuanto confirmemos tu Yapeo te enviaremos tus fotos a tu WhatsApp. 💬</div>@endif
-    @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
-
-    {{-- Resumen del pedido --}}
-    <div class="kv"><span>Evento</span><span>{{ $event->name }}</span></div>
-    <div class="kv"><span>Nombre</span><span>{{ $order->customer_name }}</span></div>
-    <div class="kv"><span>Fotos</span><span>{{ $order->photo_count }}</span></div>
-    @if($order->subtotal - $order->total > 0.001)
-      <div class="kv" style="color:var(--brand2)"><span>{{ $order->applied_label ?: 'Descuento' }}</span><span>- {{ $event->currency }} {{ number_format($order->subtotal - $order->total,2) }}</span></div>
+      <div class="kv tot"><span>Total {{ $st==='aprobado'?'pagado':'a pagar' }}</span><b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></div>
     @endif
-    <div class="kv tot"><span>Total {{ $st==='aprobado'?'pagado':'a pagar' }}</span><b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></div>
 
     {{-- ====== ESTADO: APROBADO -> descargas ====== --}}
     @if($st==='aprobado')
@@ -165,42 +186,43 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
       @endif
 
       @php $qrurl = !empty($yape['qr_path']) ? \Illuminate\Support\Facades\Storage::disk(config('storage.public_disk'))->url($yape['qr_path']) : null; @endphp
-      <div class="yapebox">
-        <div class="yapehead">Yape</div>
 
-        @if(!empty($yape['number']))
-          <div class="paytip">📱 ¿Pagas desde este mismo celular? Lo más fácil: <b>yapea directo a este número</b>. (No escanees el QR de esta pantalla: no se puede escanear con el mismo teléfono en el que lo ves.)</div>
-          <div class="numrow">
-            <div class="paynum" id="yapenum">{{ $yape['number'] }}</div>
-            <button type="button" class="copybtn" onclick="copyNum(this)">Copiar número</button>
-          </div>
-          <div class="payacc" style="margin-top:6px">{{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>
-        @endif
+      {{-- 1) El número, grande, con un solo botón: copiarlo --}}
+      @if(!empty($yape['number']))
+        <div class="paybox">
+          <div class="paylbl">Yape al número</div>
+          <div class="paynum" id="yapenum">{{ $yape['number'] }}</div>
+          <div class="payacc">{{ $yape['account'] ?: 'Joel Garate Fotografía' }}</div>
+          <button type="button" class="copybtn" onclick="copyNum(this)">📋 Copiar número</button>
+        </div>
+      @endif
 
-        <div class="payamt">Monto a pagar: <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b></div>
-
-        @if($qrurl)
-          <div class="qrblock">
-            <div class="qrttl">Pagar escaneando el QR</div>
-            <img class="qr" src="{{ $qrurl }}" alt="QR Yape">
-            <div class="qrbtns">
-              <button type="button" class="btn" onclick="openQR()">🔍 Ver QR grande</button>
-              <a class="btn ghost" href="{{ $qrurl }}" download="yape-joelgarate.png">Guardar QR</a>
-            </div>
-            <div class="qrhint">Para escanear desde OTRO celular, toca “Ver QR grande” y apúntalo. Si quieres subirlo desde la galería de Yape, abre “Ver QR grande” y toma la captura ahí: se ve limpio y grande, sin letras alrededor, para que no salga error al escanear.</div>
-          </div>
-        @endif
-
-        <ol class="steps">
-          <li>Abre tu app <b>Yape</b> y <b>yapea al número de arriba</b> (o escanea el QR si estás en otra pantalla).</li>
-          <li>Paga exactamente <b>{{ $event->currency }} {{ number_format($order->total,2) }}</b>.</li>
-          <li>Sube la captura de tu Yape aquí abajo y envía. Con la captura es suficiente.</li>
-          <li>Joel confirma tu pago y te enviamos tus fotos en alta, <b>sin marca de agua</b>, directo a tu <b>WhatsApp</b> ({{ $order->customer_contact }}). También quedan disponibles para descargar aquí.</li>
-        </ol>
-        <div class="dltip" style="margin-top:14px">💬 Apenas Joel confirme tu Yapeo, recibirás tus fotos en tu WhatsApp <b>{{ $order->customer_contact }}</b>.</div>
-      </div>
-
+      {{-- 2) Subir la captura: la acción principal, al centro --}}
       @include('gallery.partials.receipt-form')
+
+      {{-- 3) Alternativa: mandarlo por WhatsApp --}}
+      @php
+        $waNum = preg_replace('/\D/', '', $yape['number'] ?? '');
+        if (strlen($waNum) === 9) { $waNum = '51'.$waNum; } // Perú
+        $waMsg = 'Hola Joel, te envío la captura de mi Yape del pedido '.$order->code
+               . ' ("'.$event->name.'"). Son '.$order->photo_count.' foto(s) por '
+               . $event->currency.' '.number_format($order->total,2).'. Mi nombre: '.$order->customer_name.'.';
+      @endphp
+      @if($waNum)
+        <a class="btn wa" id="waDirect" target="_blank" rel="noopener"
+           href="https://wa.me/{{ $waNum }}?text={{ rawurlencode($waMsg) }}"
+           data-avisar="{{ route('gallery.order.whatsapp', ['slug'=>$event->slug,'code'=>$order->code]).'?t='.$order->token }}">
+          <span style="font-size:18px">💬</span> O enviar captura por WhatsApp directo
+        </a>
+        <div class="wahint">Se abre el chat con Joel y el pedido ya escrito. Adjunta ahí la captura de tu Yape.</div>
+      @endif
+
+      {{-- 4) El QR queda a un toque, para quien paga desde otro celular --}}
+      @if($qrurl)
+        <button type="button" class="qrlink" onclick="openQR()">¿Pagas desde otro celular? Ver el QR</button>
+      @endif
+
+      <div class="promise">Apenas confirmemos tu pago recibirás tus fotos sin marca de agua en tu WhatsApp <b>{{ $order->customer_contact }}</b>.</div>
     @endif
 
     {{-- fotos del pedido (miniaturas) para estados no-aprobado --}}
@@ -230,6 +252,23 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 @endif
 <footer>FotoEvento · Joel Garate Fotografía</footer>
 <script>
+/* Botón verde: abre el chat de WhatsApp Y avisa al fotógrafo, porque el comprobante
+   va a llegar a su celular y el panel no se enteraría solo. El aviso no puede frenar
+   la apertura del chat: se manda con keepalive y el enlace sigue su curso. */
+(function(){
+  var a=document.getElementById('waDirect'); if(!a) return;
+  var url=a.getAttribute('data-avisar'), meta=document.querySelector('meta[name=csrf-token]');
+  var avisado=false;
+  a.addEventListener('click',function(){
+    if(avisado||!url||!meta) return;
+    avisado=true;
+    try{
+      fetch(url,{method:'POST',keepalive:true,headers:{
+        'X-CSRF-TOKEN':meta.content,'Accept':'application/json'
+      }}).catch(function(){});
+    }catch(e){}
+  });
+})();
 function openQR(){var m=document.getElementById('qrFull');if(m)m.classList.add('open');}
 function closeQR(){var m=document.getElementById('qrFull');if(m)m.classList.remove('open');}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeQR();});

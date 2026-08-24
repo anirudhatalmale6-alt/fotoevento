@@ -36,6 +36,28 @@ class WhatsAppNotifier
     }
 
     /**
+     * Aviso cuando el cliente elige mandar la captura por WhatsApp en vez de subirla.
+     * No hay comprobante en el panel todavía: el aviso existe justamente para que el
+     * fotógrafo sepa que tiene que mirar su chat y aprobar el pedido a mano.
+     */
+    public function notifySendingByWhatsApp(Order $order): void
+    {
+        $order->loadMissing('event');
+        $cur   = $order->event?->currency ?: '';
+        $total = number_format((float) $order->total, 2);
+        $adminLink = route('admin.orders.show', ['order' => $order->id]);
+
+        $text = "💬 Te van a mandar la captura por WhatsApp.\n"
+              . "Pedido {$order->code}\n"
+              . "Cliente: {$order->customer_name}\n"
+              . "Fotos: {$order->photo_count} · Total: {$cur} {$total}\n"
+              . "Contacto: {$order->customer_contact}\n"
+              . "Revisa tu chat y aprueba aquí: {$adminLink}";
+
+        $this->send($text);
+    }
+
+    /**
      * Aviso cuando entra un pedido nuevo (antes de pagar). Disponible pero NO se usa
      * por defecto: el fotógrafo prefiere enterarse sólo cuando el cliente ya pagó.
      */
